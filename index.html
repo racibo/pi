@@ -21,12 +21,12 @@ h1{margin:0 0 6px;text-align:center;font-size:34px}
 .players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .player{background:#111720;border-radius:14px;padding:12px;text-align:center;border:1px solid transparent}
 .player.leading{border-color:#7ee2a8}.player.losing{border-color:#ff9d9d}
-.player-name{font-weight:800;margin-bottom:4px}.player-value{font-size:25px;font-weight:800}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
+.player-name{font-weight:800;margin-bottom:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:32px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
 .chart-wrap{background:#111720;border-radius:16px;padding:12px;margin-bottom:18px}
 .chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:4px}
 .chart-help{text-align:center;color:#7f8b9a;font-size:12px;margin-bottom:4px}
 #chart{display:block;width:100%;height:260px}
-.prompt{text-align:center;color:#c9d2df;margin-bottom:14px}
+.prompt{text-align:center;color:#c9d2df;margin-bottom:14px}.current-operation-label{text-align:center;font-size:12px;font-weight:800;letter-spacing:.04em;color:#7ee2a8;margin:2px 0 8px}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:16px;padding:20px 12px;font-size:22px;font-weight:700;cursor:pointer;transition:.15s}
 button:hover{transform:translateY(-2px);background:#222d3e;border-color:#71809a}
@@ -34,7 +34,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
 #feedback{text-align:center;min-height:52px;margin-top:18px;font-size:17px;line-height:1.45}
 .good{color:#7ee2a8}.bad{color:#ff9d9d}.muted{color:#aeb9c8}
 .pass{display:none;text-align:center;padding:24px 8px}
-.pass.show{display:block}.pass h2{margin:0 0 10px;font-size:28px}.pass p{color:#aeb9c8;margin:0 0 20px}
+.pass.show{display:block;position:relative;z-index:2}.pass h2{margin:0 0 10px;font-size:28px}.pass p{color:#aeb9c8;margin:0 0 20px}
 .pass button{font-size:18px;padding:14px 22px}
 .actions{display:flex;justify-content:center;gap:8px;margin-top:8px}.restart{font-size:16px;padding:11px 18px}
 .hidden{display:none!important}
@@ -78,12 +78,14 @@ button:disabled{opacity:.55;cursor:default;transform:none}
     <div class="players">
       <div class="player" id="p1Card">
         <div class="player-name">Gracz 1</div>
+        <div class="current-label">LICZBA DLA TEJ RUNDY</div>
         <div class="player-value" id="p1Value">1</div>
         <div class="player-error">błąd: <span id="p1Error">2,141592654</span></div>
         <div class="turn" id="p1Turn"></div>
       </div>
       <div class="player" id="p2Card">
         <div class="player-name">Gracz 2</div>
+        <div class="current-label">LICZBA DLA TEJ RUNDY</div>
         <div class="player-value" id="p2Value">1</div>
         <div class="player-error">błąd: <span id="p2Error">2,141592654</span></div>
         <div class="turn" id="p2Turn"></div>
@@ -97,6 +99,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
     </div>
 
     <div id="multiPlay">
+      <div class="current-operation-label">DZIAŁANIE WYKONASZ NA SWOJEJ LICZBIE POWYŻEJ</div>
       <div class="prompt" id="multiPrompt">Gracz 1 wybiera pierwszy.</div>
       <div class="options"><button id="ma" type="button"></button><button id="mb" type="button"></button></div>
     </div>
@@ -283,6 +286,7 @@ function continuePass(){
 }
 
 function revealRound(){
+  if(answer[1]===null||answer[2]===null)return;
   const old1=error(p1),old2=error(p2);
   p1=answer[1].op==='×'?p1*answer[1].factor:p1/answer[1].factor;
   p2=answer[2].op==='×'?p2*answer[2].factor:p2/answer[2].factor;
@@ -297,6 +301,7 @@ function revealRound(){
   document.getElementById('passScreen').classList.remove('show');
   document.getElementById('multiPlay').classList.add('hidden');
   document.getElementById('reveal').classList.add('show');
+  document.getElementById('continuePass').blur();
 }
 
 function nextMultiRound(){
