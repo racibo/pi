@@ -129,7 +129,7 @@ let mode='single';
 let value=1,round=1,history=[{round:1,value:1,error:error(1)}];
 
 let p1=1,p2=1,multiRound=1,multiHistory=[{round:1,p1Error:error(1),p2Error:error(1)}];
-let firstPlayer=1,answer={1:null,2:null},sharedOptions=[];
+let firstPlayer=1,activePlayer=1,answer={1:null,2:null},sharedOptions=[];
 
 function candidateIntegers(){
   const result=[];
@@ -243,7 +243,7 @@ function drawMultiChart(){
 }
 
 function startMulti(){
-  p1=1;p2=1;multiRound=1;firstPlayer=1;answer={1:null,2:null};
+  p1=1;p2=1;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};
   multiHistory=[{round:1,p1Error:error(1),p2Error:error(1)}];
   document.getElementById('singleMode').classList.add('hidden');
   document.getElementById('multiMode').classList.remove('hidden');
