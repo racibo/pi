@@ -201,7 +201,7 @@ function makeSharedOptions(){
 }
 
 function currentPlayer(){return activePlayer}
-function otherPlayer(){return firstPlayer===1?2:1}
+function otherPlayer(){return activePlayer===1?2:1}
 
 function renderMulti(){
   document.getElementById('multiRound').textContent=multiRound;
