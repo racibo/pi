@@ -6,126 +6,197 @@
 <title>Droga do π</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color-scheme:dark}
-*{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#24324a,#0d1117 60%);color:#f4f7fb;padding:18px}
-.card{width:min(620px,100%);background:rgba(20,26,36,.94);border:1px solid #394456;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
-h1{margin:0 0 6px;text-align:center;font-size:34px}.sub{text-align:center;color:#aeb9c8;margin:0 0 24px}
-.target{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0 24px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#24324a,#0d1117 60%);color:#f4f7fb;padding:18px}
+.card{width:min(700px,100%);background:rgba(20,26,36,.94);border:1px solid #394456;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
+h1{margin:0 0 6px;text-align:center;font-size:34px}
+.sub{text-align:center;color:#aeb9c8;margin:0 0 22px}
+.target{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0 22px}
 .pi{font-size:48px;font-weight:800}.target span{color:#9eabbc}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px}.stat{background:#111720;border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
-.prompt{text-align:center;color:#c9d2df;margin-bottom:14px}.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+.stat{background:#111720;border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
+.chart-wrap{background:#111720;border-radius:16px;padding:12px 12px 8px;margin-bottom:18px}
+.chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:6px}
+#chart{display:block;width:100%;height:155px}
+.prompt{text-align:center;color:#c9d2df;margin-bottom:14px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:16px;padding:20px 12px;font-size:22px;font-weight:700;cursor:pointer;transition:.15s}
 button:hover{transform:translateY(-2px);background:#222d3e;border-color:#71809a}
-button:disabled{cursor:default;opacity:.65;transform:none}
-#feedback{text-align:center;min-height:64px;margin-top:20px;font-size:17px;line-height:1.45}
+#feedback{text-align:center;min-height:52px;margin-top:18px;font-size:17px;line-height:1.45}
 .good{color:#7ee2a8}.bad{color:#ff9d9d}.muted{color:#aeb9c8}
-.actions{display:flex;justify-content:center;margin-top:8px}.restart{font-size:16px;padding:11px 18px;display:none}
-@media(max-width:500px){.card{padding:20px}.pi{font-size:40px}.stats{grid-template-columns:1fr}.options{grid-template-columns:1fr}}
+.actions{display:flex;justify-content:center;margin-top:8px}.restart{font-size:16px;padding:11px 18px}
+@media(max-width:500px){.card{padding:20px}.pi{font-size:40px}.stats{grid-template-columns:1fr}.options{grid-template-columns:1fr}#chart{height:140px}}
 </style>
 </head>
 <body>
 <main class="card">
   <h1>Droga do π</h1>
-  <p class="sub">Wybierz działanie, które najbardziej przybliży aktualną liczbę do π.</p>
+  <p class="sub">Krąż wokół π. Możesz się oddalić, popełniać błędy i później wrócić bliżej.</p>
   <div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
+
   <div class="stats">
     <div class="stat"><small>Aktualna liczba</small><b id="value">1</b></div>
-    <div class="stat"><small>Błąd</small><b id="error">2,141592654</b></div>
+    <div class="stat"><small>Błąd od π</small><b id="error">2,141592654</b></div>
     <div class="stat"><small>Runda</small><b id="round">1</b></div>
   </div>
-  <div class="prompt">Które działanie wybierasz?</div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Odległość od π — niżej = bliżej</div>
+    <svg id="chart" viewBox="0 0 640 155" preserveAspectRatio="none" aria-label="Wykres odległości od pi"></svg>
+  </div>
+
+  <div class="prompt">Wybierz następne działanie:</div>
   <div class="options">
     <button id="a"></button><button id="b"></button>
   </div>
-  <div id="feedback" class="muted">Policz wynik w głowie lub na kartce.</div>
-  <div class="actions"><button class="restart" id="restart">Zagraj ponownie</button></div>
+  <div id="feedback" class="muted" aria-live="polite">Policz wynik w głowie lub na kartce.</div>
+  <div class="actions"><button class="restart" id="restart">Zacznij od początku</button></div>
 </main>
+
 <script>
 const PI=Math.PI;
-let value=1, round=1, alive=true;
+let value=1,round=1;
+let history=[{round:1,error:Math.abs(1-PI)}];
+
 const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10});
-const exact=n=>Math.abs(n-PI);
-const integerCandidates=[2,3,4];
-const fractionalCandidates=[0.5,0.75,0.9,0.95,0.98,0.99,0.995,0.999,0.9995,1.001,1.005,1.01,1.02,1.05,1.1,1.2,1.5,2,2.5,3,3.14,3.15,4];
-function operationForRatio(r){
-  if(r>=1) return {op:'×',factor:r,label:'× '+fmt(r),result:value*r};
-  return {op:'÷',factor:r,label:'÷ '+fmt(r),result:value/r};
+const error=n=>Math.abs(n-PI);
+
+const integers=[2,3,4,5,6];
+const simple=[0.95,0.98,0.99,0.995,1.005,1.01,1.02,1.05,1.1,1.2,1.25,1.5,2,2.5,3];
+const precise=[0.999,0.9995,0.9997,0.9998,0.9999,1.0001,1.0002,1.0003,1.0005,1.001,1.0015,1.002,1.003,1.004];
+
+function operation(op,factor){
+  const result=op==='×'?value*factor:value/factor;
+  return {op,factor,result,label:op+' '+fmt(factor)};
 }
+
+function operations(list){
+  return list.flatMap(f=>[operation('×',f),operation('÷',f)])
+    .filter(o=>Number.isFinite(o.result)&&o.result>=0);
+}
+
+function randomItem(list){
+  return list[Math.floor(Math.random()*list.length)];
+}
+
 function makeOptions(){
-  const ratio=PI/value;
-  // Dopóki da się zrobić ruch całkowity, używamy wyłącznie liczb całkowitych.
-  // Gdy żadne działanie na liczbach całkowitych nie przybliża do π, przechodzimy na ułamki.
-  const integerOptions=integerCandidates.map(v=>[
-    {op:'×',factor:v,label:'× '+fmt(v),result:value*v},
-    {op:'÷',factor:v,label:'÷ '+fmt(v),result:value/v}
-  ]).flat();
-  let good=integerOptions.filter(o=>exact(o.result)<exact(value)).sort((a,b)=>exact(a.result)-exact(b.result))[0];
-  let pool=integerOptions;
-  if(!good){
-    const precision = Math.abs(value-PI)<0.02 ? 5 : (Math.abs(value-PI)<0.2 ? 4 : 3);
-    const p=10**precision;
-    const rounded=Math.round(ratio*p)/p;
-    good=operationForRatio(rounded);
-    if(exact(good.result)>=exact(value)){
-      const eps=ratio>=1 ? 1/p : -1/p;
-      good=operationForRatio(Math.round((ratio+eps)*p)/p);
-    }
-    pool=fractionalCandidates.map(v=>[
-      {op:'×',factor:v,label:'× '+fmt(v),result:value*v},
-      {op:'÷',factor:v,label:'÷ '+fmt(v),result:value/v}
-    ]).flat();
+  const currentError=error(value);
+  let pool=operations(integers);
+  let improving=pool.filter(o=>error(o.result)<currentError);
+
+  /*
+   * Najdłużej gramy na liczbach całkowitych. Gdy jesteśmy już blisko π,
+   * pojawia się możliwość użycia prostego ułamka. Jeszcze bliżej π
+   * dopuszczamy dokładniejsze wartości bliskie 1.
+   */
+  if(currentError<0.2){
+    const extra=operations(simple);
+    pool=pool.concat(extra);
+    improving=pool.filter(o=>error(o.result)<currentError);
   }
-  let bad=pool.filter(o=>Math.abs(o.result-PI)>Math.abs(good.result-PI)*1.8+0.000001);
-  bad=bad[Math.floor(Math.random()*bad.length)] || pool.find(o=>o!==good && exact(o.result)>exact(value)) || {op:'×',factor:4,label:'× 4',result:value*4};
-  let arr=[good,bad];
-  if(Math.random()<.5) arr.reverse();
-  document.getElementById('a').textContent=arr[0].label;
-  document.getElementById('b').textContent=arr[1].label;
-  document.getElementById('a').dataset.good=arr[0]===good;
-  document.getElementById('b').dataset.good=arr[1]===good;
+  if(currentError<0.02){
+    const extra=operations(precise);
+    pool=pool.concat(extra);
+    improving=pool.filter(o=>error(o.result)<currentError);
+  }
+
+  let first,second;
+
+  if(improving.length){
+    first=randomItem(improving);
+
+    /*
+     * Druga opcja jest niezależnym ruchem. Często będzie oddalała od π,
+     * ale nie ma tu odpowiedzi kończącej grę — każdy wybór jest dozwolony.
+     */
+    const alternatives=pool.filter(o=>o.op!==first.op||o.factor!==first.factor);
+    second=randomItem(alternatives);
+  }else{
+    const shuffled=[...pool].sort(()=>Math.random()-0.5);
+    first=shuffled[0];
+    second=shuffled.find(o=>o.op!==first.op||o.factor!==first.factor)||shuffled[1];
+  }
+
+  if(!second){
+    second=operation('×',4);
+  }
+
+  if(Math.random()<0.5)[first,second]=[second,first];
+
+  const a=document.getElementById('a'),b=document.getElementById('b');
+  a.textContent=first.label;b.textContent=second.label;
+  a.dataset.op=first.op;a.dataset.factor=first.factor;
+  b.dataset.op=second.op;b.dataset.factor=second.factor;
 }
+
 function render(){
   document.getElementById('value').textContent=fmt(value);
-  document.getElementById('error').textContent=fmt(exact(value));
+  document.getElementById('error').textContent=fmt(error(value));
   document.getElementById('round').textContent=round;
+  drawChart();
 }
+
+function drawChart(){
+  const svg=document.getElementById('chart');
+  const w=640,h=155,p=12;
+  const max=Math.max(...history.map(x=>x.error),0.000001);
+  const x=i=>history.length===1?w/2:p+(w-2*p)*i/(history.length-1);
+  const y=v=>h-p-(h-2*p)*(v/max);
+
+  let s='<line x1="'+p+'" y1="'+(h-p)+'" x2="'+(w-p)+'" y2="'+(h-p)+'" stroke="#465267" stroke-width="1"/>';
+  s+='<text x="'+(w-p)+'" y="'+(h-15)+'" text-anchor="end" fill="#8f9baa" font-size="11">π</text>';
+
+  if(history.length>1){
+    s+='<polyline points="'+history.map((d,i)=>x(i)+','+y(d.error)).join(' ')+'" fill="none" stroke="#7ee2a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  history.forEach((d,i)=>{
+    s+='<circle cx="'+x(i)+'" cy="'+y(d.error)+'" r="4" fill="#f4f7fb"/>';
+  });
+  svg.innerHTML=s;
+}
+
 function choose(btn){
-  if(!alive)return;
-  const good=btn.dataset.good==='true';
-  document.querySelectorAll('.options button').forEach(b=>b.disabled=true);
-  const feedback=document.getElementById('feedback');
-  if(!good){
-    alive=false;
-    const op=btn.textContent;
-    let result;
-    if(op[0]==='×') result=value*parseFloat(op.slice(2).replace(',','.'));
-    else result=value/parseFloat(op.slice(2).replace(',','.'));
-    feedback.className='bad';
-    feedback.innerHTML='<b>Nie tym razem.</b><br>'+op+' daje '+fmt(result)+', więc oddala nas od π. Błąd: '+fmt(exact(result))+'.';
-    document.getElementById('restart').style.display='inline-block';
-    return;
-  }
-  const op=btn.textContent;
-  const factor=parseFloat(op.slice(2).replace(',','.'));
-  const old=value;
-  value=op[0]==='×'?value*factor:value/factor;
-  const improvement=exact(old)-exact(value);
+  const op=btn.dataset.op;
+  const factor=Number(btn.dataset.factor);
+  const oldError=error(value);
+
+  value=op==='×'?value*factor:value/factor;
   round++;
+
+  const newError=error(value);
+  const change=newError-oldError;
+  history.push({round,error:newError});
   render();
-  if(exact(value)<0.000001){
-    alive=false;
+
+  const feedback=document.getElementById('feedback');
+  if(newError<0.000001){
     feedback.className='good';
-    feedback.innerHTML='<b>🎯 Trafione!</b><br>Osiągnąłeś błąd mniejszy niż 0,000001. Wynik: '+fmt(value)+'.';
-    document.getElementById('restart').style.display='inline-block';
-    return;
+    feedback.innerHTML='<b>🎯 Prawie idealnie!</b><br>'+op+' '+fmt(factor)+' → '+fmt(value)+'. Możesz nadal próbować krążyć wokół π.';
+  }else if(change<0){
+    feedback.className='good';
+    feedback.innerHTML='<b>Zbliżasz się.</b> Błąd zmniejszył się o '+fmt(-change)+'.';
+  }else if(change>0){
+    feedback.className='bad';
+    feedback.innerHTML='<b>Oddalasz się.</b> Błąd zwiększył się o '+fmt(change)+'. Możesz teraz spróbować wrócić.';
+  }else{
+    feedback.className='muted';
+    feedback.textContent='Odległość od π się nie zmieniła.';
   }
-  feedback.className='good';
-  feedback.innerHTML='<b>Dobrze!</b> Błąd zmniejszył się o '+fmt(improvement)+'. Następna decyzja…';
-  setTimeout(()=>{ if(alive){document.querySelectorAll('.options button').forEach(b=>b.disabled=false); makeOptions(); feedback.className='muted'; feedback.textContent='Policz wynik w głowie lub na kartce.';}},420);
+
+  makeOptions();
 }
+
 document.getElementById('a').onclick=e=>choose(e.currentTarget);
 document.getElementById('b').onclick=e=>choose(e.currentTarget);
-document.getElementById('restart').onclick=()=>{value=1;round=1;alive=true;document.getElementById('restart').style.display='none';document.querySelectorAll('.options button').forEach(b=>b.disabled=false);render();makeOptions();document.getElementById('feedback').className='muted';document.getElementById('feedback').textContent='Policz wynik w głowie lub na kartce.';};
-render();makeOptions();
+document.getElementById('restart').onclick=()=>{
+  value=1;round=1;history=[{round:1,error:error(1)}];
+  render();makeOptions();
+  document.getElementById('feedback').className='muted';
+  document.getElementById('feedback').textContent='Policz wynik w głowie lub na kartce.';
+};
+
+render();
+makeOptions();
 </script>
 </body>
 </html>
