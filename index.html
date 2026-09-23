@@ -133,7 +133,7 @@ let mode='single';
 let value=1,round=1,history=[{round:1,value:1,error:error(1)}];
 
 let base=1,p1Result=null,p2Result=null,multiRound=1,multiHistory=[];
-let firstPlayer=1,activePlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false;
+let firstPlayer=1,activePlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false,turnStage=0;
 
 function candidateIntegers(){
   const result=[];
@@ -245,7 +245,7 @@ function drawMultiChart(){
 }
 
 function startMulti(){
-  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];
+  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];turnStage=0;
   document.getElementById('singleMode').classList.add('hidden');
   document.getElementById('multiMode').classList.remove('hidden');
   document.getElementById('subtitle').textContent='Wspólna liczba bazowa. Te same dwa działania. Najpierw wybiera jeden gracz, potem drugi.';
@@ -257,34 +257,52 @@ function startMulti(){
 
 function showTurn(){
   activePlayer=firstPlayer;
+  turnStage=1;
   document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera pierwszy.';
   document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
-  document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+  document.getElementById('passScreen').classList.remove('show');
+  document.getElementById('reveal').classList.remove('show');
+  document.getElementById('multiPlay').classList.remove('hidden');
+  document.getElementById('ma').disabled=false;
+  document.getElementById('mb').disabled=false;
 }
 
 function chooseMulti(btn){
-  if(roundResolved)return;
+  if(roundResolved || turnStage===0)return;
+
   const player=activePlayer;
-  answer[player]={op:btn.dataset.op,factor:Number(btn.dataset.factor),label:btn.textContent};
-  document.getElementById('ma').disabled=true;document.getElementById('mb').disabled=true;
+  answer[player]={
+    op:btn.dataset.op,
+    factor:Number(btn.dataset.factor),
+    label:btn.textContent
+  };
+
+  document.getElementById('ma').disabled=true;
+  document.getElementById('mb').disabled=true;
   document.getElementById('multiPlay').classList.add('hidden');
-  const other=player===1?2:1;
-  if(answer[other]===null){
-    document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Graczowi '+other+'.';
+
+  if(turnStage===1){
+    turnStage=2;
+    activePlayer=player===1?2:1;
+    document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Gracz '+activePlayer+'.';
     document.getElementById('passScreen').classList.add('show');
-  }else{
+    return;
+  }
+
+  if(turnStage===2){
+    turnStage=3;
     revealRound();
   }
 }
 
 function continuePass(){
-  if(answer[1]!==null&&answer[2]!==null)return;
-  activePlayer=activePlayer===1?2:1;
+  if(turnStage!==2)return;
   document.getElementById('passScreen').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
   document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera teraz.';
   document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
-  document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+  document.getElementById('ma').disabled=false;
+  document.getElementById('mb').disabled=false;
 }
 
 function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
@@ -314,7 +332,7 @@ function nextMultiRound(){
   if(e1<e2){base=p1Result;firstPlayer=2}
   else if(e2<e1){base=p2Result;firstPlayer=1}
   else{base=p1Result;firstPlayer=firstPlayer===1?2:1}
-  multiRound++;activePlayer=firstPlayer;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;
+  multiRound++;activePlayer=firstPlayer;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;turnStage=0;
   makeSharedOptions();
   document.getElementById('reveal').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
