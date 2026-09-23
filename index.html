@@ -197,9 +197,58 @@ function chooseSingle(btn){
 }
 
 function makeSharedOptions(){
-  const pool=candidateIntegers().flatMap(f=>[{op:'×',factor:f,label:'× '+fmt(f)},{op:'÷',factor:f,label:'÷ '+fmt(f)}]);
-  let first=pool[Math.floor(Math.random()*pool.length)];
-  let second=pool.find(o=>o.op!==first.op||o.factor!==first.factor)||{op:'×',factor:2,label:'× 2'};
+  const pool=candidateIntegers().flatMap(f=>[
+    operation('×',f,base),
+    operation('÷',f,base)
+  ]).filter(o=>Number.isFinite(o.result)&&o.result>=0);
+
+  // W kolejnych rundach dopuszczalna różnica wyników maleje:
+  // R1 = 15%, R2 = 14%, ... minimum 2%.
+  const maxRelativeDiff=Math.max(0.02,0.15-(multiRound-1)*0.01);
+  const preferredMinRelativeDiff=maxRelativeDiff*0.35;
+  const pairs=[];
+
+  for(let i=0;i<pool.length;i++){
+    for(let j=i+1;j<pool.length;j++){
+      const a=pool[i],b=pool[j];
+      if(a.op===b.op&&a.factor===b.factor)continue;
+      const scale=Math.max(Math.abs(a.result),Math.abs(b.result),1e-12);
+      const relativeDiff=Math.abs(a.result-b.result)/scale;
+      if(relativeDiff<=maxRelativeDiff&&relativeDiff>=preferredMinRelativeDiff){
+        pairs.push({a,b,relativeDiff});
+      }
+    }
+  }
+
+  // Jeżeli w danej rundzie nie ma pary w preferowanym zakresie,
+  // wybierz dowolną parę mieszczącą się w limicie.
+  if(!pairs.length){
+    for(let i=0;i<pool.length;i++){
+      for(let j=i+1;j<pool.length;j++){
+        const a=pool[i],b=pool[j];
+        const scale=Math.max(Math.abs(a.result),Math.abs(b.result),1e-12);
+        const relativeDiff=Math.abs(a.result-b.result)/scale;
+        if(relativeDiff<=maxRelativeDiff)pairs.push({a,b,relativeDiff});
+      }
+    }
+  }
+
+  // Awaryjnie wybierz dwie najbliższe wartości.
+  if(!pairs.length){
+    let best=null;
+    for(let i=0;i<pool.length;i++){
+      for(let j=i+1;j<pool.length;j++){
+        const a=pool[i],b=pool[j];
+        const scale=Math.max(Math.abs(a.result),Math.abs(b.result),1e-12);
+        const relativeDiff=Math.abs(a.result-b.result)/scale;
+        if(!best||relativeDiff<best.relativeDiff)best={a,b,relativeDiff};
+      }
+    }
+    if(best)pairs.push(best);
+  }
+
+  const chosen=pairs[Math.floor(Math.random()*pairs.length)];
+  const first=chosen.a,second=chosen.b;
   if(Math.random()<.5)[first,second]=[second,first];
   sharedOptions=[first,second];
   setButtons('ma','mb',first,second);
