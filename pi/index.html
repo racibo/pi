@@ -25,66 +25,185 @@ h1{margin:0 0 6px;text-align:center;font-size:34px}
 .chart-wrap{background:#111720;border-radius:16px;padding:12px;margin-bottom:18px}
 .chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:4px}
 .chart-help{text-align:center;color:#7f8b9a;font-size:12px;margin-bottom:4px}
-#chart{display:block;width:100%;height:260px}
-#multiChart{display:block;width:100%;height:280px}
+#chart{display:block;width:100%;height:260px}#multiChart{display:block;width:100%;height:280px}
 .prompt{text-align:center;color:#c9d2df;margin-bottom:14px}.current-operation-label{text-align:center;font-size:12px;font-weight:800;letter-spacing:.04em;color:#7ee2a8;margin:2px 0 8px}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:16px;padding:20px 12px;font-size:22px;font-weight:700;cursor:pointer;transition:.15s}
 button:hover{transform:translateY(-2px);background:#222d3e;border-color:#71809a}
 button:disabled{opacity:.55;cursor:default;transform:none}
-#feedback{ text-align:center;min-height:52px;margin-top:18px;font-size:17px;line-height:1.45}
+#feedback{text-align:center;min-height:52px;margin-top:18px;font-size:17px;line-height:1.45}
 .good{color:#7ee2a8}.bad{color:#ff9d9d}.muted{color:#aeb9c8}
-.pass{display:none;text-align:center;padding:24px 8px}.pass.show{display:block;position:relative;z-index:2}
-.pass h2{margin:0 0 10px;font-size:28px}.pass p{color:#aeb9c8;margin:0 0 20px;white-space:pre-line}.pass button{font-size:18px;padding:14px 22px}
-.hidden{display:none!important}
+.pass{display:none;text-align:center;padding:24px 8px}
+.pass.show{display:block;position:relative;z-index:2}.pass h2{margin:0 0 10px;font-size:28px}.pass p{color:#aeb9c8;margin:0 0 20px}
+.pass button{font-size:18px;padding:14px 22px}
 .actions{display:flex;justify-content:center;gap:8px;margin-top:8px}.restart{font-size:16px;padding:11px 18px}
+.hidden{display:none!important}
 @media(max-width:500px){.card{padding:20px}.pi{font-size:40px}.stats{grid-template-columns:1fr}.options{grid-template-columns:1fr}#chart,#multiChart{height:230px}}
 </style>
 </head>
 <body>
 <main class="card">
-<h1>Droga do π</h1>
-<p class="sub" id="subtitle">Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.</p>
-<div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
-<div class="modebar"><button id="mode1" class="active" type="button">1 gracz</button><button id="mode2" type="button">2 graczy · jeden telefon</button></div>
+  <h1>Droga do π</h1>
+  <p class="sub" id="subtitle">Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.</p>
+  <div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
 
-<section id="singleMode">
-<div class="stats"><div class="stat"><small>Aktualna liczba</small><b id="value">1</b></div><div class="stat"><small>Błąd od π</small><b id="error">2,141592654</b></div><div class="stat"><small>Runda</small><b id="round">1</b></div></div>
-<div class="chart-wrap"><div class="chart-title">Krążenie wokół π</div><div class="chart-help">Środek = π · odległość od środka = błąd</div><svg id="chart" viewBox="0 0 640 260"></svg></div>
-<div class="prompt">Wybierz następne działanie:</div><div class="options"><button id="a" type="button"></button><button id="b" type="button"></button></div>
-<div id="feedback" class="muted" aria-live="polite">Policz wynik w głowie lub na kartce.</div>
-</section>
+  <div class="modebar">
+    <button id="mode1" class="active" type="button">1 gracz</button>
+    <button id="mode2" type="button">2 graczy · jeden telefon</button>
+  </div>
 
-<section id="multiMode" class="hidden">
-<div class="stats"><div class="stat"><small>Runda</small><b id="multiRound">1</b></div><div class="stat"><small>Przewaga</small><b id="lead">—</b></div><div class="stat"><small>Teraz wybiera</small><b id="nextPlayer">Gracz 1</b></div></div>
-<div class="players">
-<div class="player" id="p1Card"><div class="player-name">Gracz 1</div><div class="player-value" id="p1Value">1</div><div class="player-error">błąd: <span id="p1Error">2,141592654</span></div><div class="turn" id="p1Turn"></div></div>
-<div class="player" id="p2Card"><div class="player-name">Gracz 2</div><div class="player-value" id="p2Value">1</div><div class="player-error">błąd: <span id="p2Error">2,141592654</span></div><div class="turn" id="p2Turn"></div></div>
-</div>
-<div class="chart-wrap"><div class="chart-title">Wyścig do π</div><div class="chart-help">Im niżej, tym bliżej π · linie pokazują odległość obu graczy</div><svg id="multiChart" viewBox="0 0 640 280"></svg></div>
-<div id="multiPlay"><div class="prompt" id="multiPrompt">Gracz 1 wybiera pierwszy.</div><div class="options"><button id="ma" type="button"></button><button id="mb" type="button"></button></div></div>
-<div id="passScreen" class="pass"><h2>Przekaż telefon</h2><p id="passText">Gracz 1 odpowiedział. Teraz kolej na Gracza 2.</p><button id="continuePass" type="button">Gotowe — pokaż pytanie</button></div>
-<div id="reveal" class="pass"><h2 id="revealTitle">Wyniki rundy</h2><p id="revealText"></p><button id="nextRound" type="button">Następna runda</button></div>
-</section>
-<div class="actions"><button class="restart" id="restart" type="button">Zacznij od początku</button></div>
+  <section id="singleMode">
+    <div class="stats">
+      <div class="stat"><small>Aktualna liczba</small><b id="value">1</b></div>
+      <div class="stat"><small>Błąd od π</small><b id="error">2,141592654</b></div>
+      <div class="stat"><small>Runda</small><b id="round">1</b></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Krążenie wokół π</div>
+      <div class="chart-help">Środek = π · odległość od środka = błąd</div>
+      <svg id="chart" viewBox="0 0 640 260" aria-label="Wykres drogi do pi"></svg>
+    </div>
+    <div class="prompt">Wybierz następne działanie:</div>
+    <div class="options"><button id="a" type="button"></button><button id="b" type="button"></button></div>
+    <div id="feedback" class="muted" aria-live="polite">Policz wynik w głowie lub na kartce.</div>
+  </section>
+
+  <section id="multiMode" class="hidden">
+    <div class="stats">
+      <div class="stat"><small>Runda</small><b id="multiRound">1</b></div>
+      <div class="stat"><small>Przewaga</small><b id="lead">—</b></div>
+      <div class="stat"><small>Teraz wybiera</small><b id="nextPlayer">Gracz 1</b></div>
+    </div>
+
+    <div class="base-number"><small>WSPÓLNA LICZBA BAZOWA</small><b id="baseValue">1</b><span>Obaj gracze wykonują działanie na tej samej liczbie</span></div>
+    <div class="players">
+      <div class="player" id="p1Card">
+        <div class="player-name">Gracz 1</div>
+        <div class="current-label">LICZBA DLA TEJ RUNDY</div>
+        <div class="player-value" id="p1Value">1</div>
+        <div class="player-error">błąd: <span id="p1Error">2,141592654</span></div>
+        <div class="turn" id="p1Turn"></div>
+      </div>
+      <div class="player" id="p2Card">
+        <div class="player-name">Gracz 2</div>
+        <div class="current-label">LICZBA DLA TEJ RUNDY</div>
+        <div class="player-value" id="p2Value">1</div>
+        <div class="player-error">błąd: <span id="p2Error">2,141592654</span></div>
+        <div class="turn" id="p2Turn"></div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Wyścig do π</div>
+      <div class="chart-help">Im niżej, tym bliżej π · linie pokazują odległość obu graczy</div>
+      <svg id="multiChart" viewBox="0 0 640 280" aria-label="Liniowy wykres odległości obu graczy od pi"></svg>
+    </div>
+
+    <div id="multiPlay">
+      <div class="current-operation-label">DZIAŁANIE WYKONASZ NA SWOJEJ LICZBIE POWYŻEJ</div>
+      <div class="prompt" id="multiPrompt">Gracz 1 wybiera pierwszy.</div>
+      <div class="options"><button id="ma" type="button"></button><button id="mb" type="button"></button></div>
+    </div>
+
+    <div id="passScreen" class="pass">
+      <h2>Przekaż telefon</h2>
+      <p id="passText">Gracz 1 odpowiedział. Teraz kolej na Gracza 2.</p>
+      <button id="continuePass" type="button">Gotowe — pokaż pytanie</button>
+    </div>
+
+    <div id="reveal" class="pass">
+      <h2 id="revealTitle">Wyniki rundy</h2>
+      <p id="revealText"></p>
+      <button id="nextRound" type="button">Następna runda</button>
+    </div>
+
+    <div id="multiFeedback" class="muted" aria-live="polite"></div>
+  </section>
+
+  <div class="actions"><button class="restart" id="restart" type="button">Zacznij od początku</button></div>
 </main>
 
 <script>
-const PI=Math.PI,fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10}),error=n=>Math.abs(n-PI);
+const PI=Math.PI;
+const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10});
+const error=n=>Math.abs(n-PI);
 const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:value/factor,label:op+' '+fmt(factor)});
-let mode='single',value=1,round=1,history=[{round:1,value:1,error:error(1)}];
-let p1=1,p2=1,multiRound=1,multiHistory=[{round:1,p1Error:error(1),p2Error:error(1)}],firstPlayer=1,activePlayer=1,answer={1:null,2:null},sharedOptions=[];
 
-function candidateIntegers(){const r=[];for(let i=2;i<=20;i++)r.push(i);for(let i=21;i<=120;i++)if(Math.random()<.16)r.push(i);return r}
-function makePool(base){return candidateIntegers().flatMap(f=>[operation('×',f,base),operation('÷',f,base)]).filter(o=>Number.isFinite(o.result)&&o.result>=0)}
-function setButtons(id1,id2,o1,o2){const a=document.getElementById(id1),b=document.getElementById(id2);a.textContent=o1.label;b.textContent=o2.label;a.dataset.op=o1.op;a.dataset.factor=o1.factor;b.dataset.op=o2.op;b.dataset.factor=o2.factor}
-function makeSingleOptions(){const pool=makePool(value),first=pool[Math.floor(Math.random()*pool.length)],second=pool.find(o=>o.op!==first.op||o.factor!==first.factor)||operation('×',2,value);let a=first,b=second;if(Math.random()<.5)[a,b]=[b,a];setButtons('a','b',a,b)}
-function renderSingle(){document.getElementById('value').textContent=fmt(value);document.getElementById('error').textContent=fmt(error(value));document.getElementById('round').textContent=round;drawSingleChart()}
-function drawSingleChart(){const svg=document.getElementById('chart'),w=640,h=260,cx=w/2,cy=h/2,maxR=104,maxE=Math.max(...history.map(x=>x.error),.000001),radius=e=>12+maxR*Math.sqrt(e/(maxE+1e-12));const point=(item,i)=>{const a=-Math.PI/2+i*.62,r=radius(item.error);return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)}};let s='<circle cx="'+cx+'" cy="'+cy+'" r="'+maxR+'" fill="none" stroke="#263140"/><circle cx="'+cx+'" cy="'+cy+'" r="12" fill="#7ee2a8" opacity=".22"/><circle cx="'+cx+'" cy="'+cy+'" r="4" fill="#7ee2a8"/><text x="'+cx+'" y="'+(cy+28)+'" text-anchor="middle" fill="#aeb9c8" font-size="12">π</text>';if(history.length>1){const pts=history.map(point);s+='<polyline points="'+pts.map(p=>p.x+','+p.y).join(' ')+'" fill="none" stroke="#7ee2a8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'}history.forEach((item,i)=>{const p=point(item,i);s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(i===history.length-1?6:3.5)+'" fill="'+(i===history.length-1?'#fff':'#aeb9c8')+'"/>'});svg.innerHTML=s}
-function chooseSingle(btn){const op=btn.dataset.op,f=Number(btn.dataset.factor),old=error(value);value=op==='×'?value*f:value/f;round++;const e=error(value),change=e-old;history.push({round,value,error:e});renderSingle();const fb=document.getElementById('feedback');if(change<0){fb.className='good';fb.innerHTML='<b>Zbliżasz się.</b> Błąd zmniejszył się o '+fmt(-change)+'.'}else if(change>0){fb.className='bad';fb.innerHTML='<b>Oddalasz się.</b> Błąd zwiększył się o '+fmt(change)+'.'}else{fb.className='muted';fb.textContent='Odległość od π się nie zmieniła.'}makeSingleOptions()}
+let mode='single';
+let value=1,round=1,history=[{round:1,value:1,error:error(1)}];
 
-function makeSharedOptions(){const pool=candidateIntegers().flatMap(f=>[{op:'×',factor:f,label:'× '+fmt(f)},{op:'÷',factor:f,label:'÷ '+fmt(f)}]);let a=pool[Math.floor(Math.random()*pool.length)],b=pool.find(o=>o.op!==a.op||o.factor!==a.factor)||{op:'×',factor:2,label:'× 2'};if(Math.random()<.5)[a,b]=[b,a];sharedOptions=[a,b];setButtons('ma','mb',a,b)}
+let base=1,p1Result=null,p2Result=null,multiRound=1,multiHistory=[];
+let firstPlayer=1,activePlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false,turnStage=0;
+
+function candidateIntegers(){
+  const result=[];
+  for(let i=2;i<=20;i++)result.push(i);
+  for(let i=21;i<=120;i++)if(Math.random()<.16)result.push(i);
+  return result;
+}
+
+function makePool(base){
+  return candidateIntegers().flatMap(f=>[operation('×',f,base),operation('÷',f,base)])
+    .filter(o=>Number.isFinite(o.result)&&o.result>=0);
+}
+
+function makeSingleOptions(){
+  const pool=makePool(value);
+  let first=pool[Math.floor(Math.random()*pool.length)];
+  let second=pool.find(o=>o.op!==first.op||o.factor!==first.factor)||operation('×',2,value);
+  if(Math.random()<.5)[first,second]=[second,first];
+  setButtons('a','b',first,second);
+}
+
+function setButtons(id1,id2,o1,o2){
+  const a=document.getElementById(id1),b=document.getElementById(id2);
+  a.textContent=o1.label;b.textContent=o2.label;
+  a.dataset.op=o1.op;a.dataset.factor=o1.factor;
+  b.dataset.op=o2.op;b.dataset.factor=o2.factor;
+}
+
+function renderSingle(){
+  document.getElementById('value').textContent=fmt(value);
+  document.getElementById('error').textContent=fmt(error(value));
+  document.getElementById('round').textContent=round;
+  drawSingleChart();
+}
+
+function drawSingleChart(){
+  const svg=document.getElementById('chart'),w=640,h=260,cx=w/2,cy=h/2,maxR=104;
+  const maxE=Math.max(...history.map(x=>x.error),.000001);
+  const radius=e=>12+maxR*Math.sqrt(e/(maxE+1e-12));
+  const point=(item,i)=>{const a=-Math.PI/2+i*.62,r=radius(item.error);return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)}};
+  let s='<circle cx="'+cx+'" cy="'+cy+'" r="'+maxR+'" fill="none" stroke="#263140"/><circle cx="'+cx+'" cy="'+cy+'" r="12" fill="#7ee2a8" opacity=".22"/><circle cx="'+cx+'" cy="'+cy+'" r="4" fill="#7ee2a8"/><text x="'+cx+'" y="'+(cy+28)+'" text-anchor="middle" fill="#aeb9c8" font-size="12">π</text>';
+  if(history.length>1){const pts=history.map(point);s+='<polyline points="'+pts.map(p=>p.x+','+p.y).join(' ')+'" fill="none" stroke="#7ee2a8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'}
+  history.forEach((item,i)=>{const p=point(item,i),r=i===history.length-1?6:3.5;s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+(i===history.length-1?'#fff':'#aeb9c8')+'"/>'});
+  svg.innerHTML=s;
+}
+
+function chooseSingle(btn){
+  const op=btn.dataset.op,f=Number(btn.dataset.factor),old=error(value);
+  value=op==='×'?value*f:value/f;round++;
+  const e=error(value),change=e-old;
+  history.push({round,value,error:e});renderSingle();
+  const fb=document.getElementById('feedback');
+  if(change<0){fb.className='good';fb.innerHTML='<b>Zbliżasz się.</b> Błąd zmniejszył się o '+fmt(-change)+'.'}
+  else if(change>0){fb.className='bad';fb.innerHTML='<b>Oddalasz się.</b> Błąd zwiększył się o '+fmt(change)+'.'}
+  else{fb.className='muted';fb.textContent='Odległość od π się nie zmieniła.'}
+  makeSingleOptions();
+}
+
+function makeSharedOptions(){
+  const pool=candidateIntegers().flatMap(f=>[{op:'×',factor:f,label:'× '+fmt(f)},{op:'÷',factor:f,label:'÷ '+fmt(f)}]);
+  let first=pool[Math.floor(Math.random()*pool.length)];
+  let second=pool.find(o=>o.op!==first.op||o.factor!==first.factor)||{op:'×',factor:2,label:'× 2'};
+  if(Math.random()<.5)[first,second]=[second,first];
+  sharedOptions=[first,second];
+  setButtons('ma','mb',first,second);
+}
+
+function currentPlayer(){return activePlayer}
 function otherPlayer(){return activePlayer===1?2:1}
+
 function renderMulti(){
   document.getElementById('multiRound').textContent=multiRound;
   document.getElementById('baseValue').textContent=fmt(base);
@@ -126,7 +245,7 @@ function drawMultiChart(){
 }
 
 function startMulti(){
-  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];
+  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];turnStage=0;
   document.getElementById('singleMode').classList.add('hidden');
   document.getElementById('multiMode').classList.remove('hidden');
   document.getElementById('subtitle').textContent='Wspólna liczba bazowa. Te same dwa działania. Najpierw wybiera jeden gracz, potem drugi.';
@@ -144,29 +263,48 @@ function showTurn(){
   document.getElementById('passScreen').classList.remove('show');
   document.getElementById('reveal').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
-  document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+  document.getElementById('ma').disabled=false;
+  document.getElementById('mb').disabled=false;
 }
+
 function chooseMulti(btn){
   if(roundResolved || turnStage===0)return;
+
   const player=activePlayer;
-  answer[player]={op:btn.dataset.op,factor:Number(btn.dataset.factor),label:btn.textContent};
-  document.getElementById('ma').disabled=true;document.getElementById('mb').disabled=true;
+  answer[player]={
+    op:btn.dataset.op,
+    factor:Number(btn.dataset.factor),
+    label:btn.textContent
+  };
+
+  document.getElementById('ma').disabled=true;
+  document.getElementById('mb').disabled=true;
   document.getElementById('multiPlay').classList.add('hidden');
+
   if(turnStage===1){
-    turnStage=2;activePlayer=player===1?2:1;
+    turnStage=2;
+    activePlayer=player===1?2:1;
     document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Gracz '+activePlayer+'.';
-    document.getElementById('passScreen').classList.add('show');return;
+    document.getElementById('passScreen').classList.add('show');
+    return;
   }
-  if(turnStage===2){turnStage=3;revealRound();}
+
+  if(turnStage===2){
+    turnStage=3;
+    revealRound();
+  }
 }
+
 function continuePass(){
   if(turnStage!==2)return;
   document.getElementById('passScreen').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
   document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera teraz.';
   document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
-  document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+  document.getElementById('ma').disabled=false;
+  document.getElementById('mb').disabled=false;
 }
+
 function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
 
 function revealRound(){
@@ -201,10 +339,30 @@ function nextMultiRound(){
   renderMulti();showTurn();
 }
 
-function reset(){if(mode==='single'){value=1;round=1;history=[{round:1,value:1,error:error(1)}];renderSingle();makeSingleOptions()}else startMulti()}
-document.getElementById('a').onclick=e=>chooseSingle(e.currentTarget);document.getElementById('b').onclick=e=>chooseSingle(e.currentTarget);document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);document.getElementById('continuePass').onclick=continuePass;document.getElementById('nextRound').onclick=nextMultiRound;document.getElementById('restart').onclick=reset;
-document.getElementById('mode1').onclick=()=>{mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');document.getElementById('singleMode').classList.remove('hidden');document.getElementById('multiMode').classList.add('hidden');document.getElementById('subtitle').textContent='Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.';reset()};
-document.getElementById('mode2').onclick=()=>{mode='multi';document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');startMulti()};
+function reset(){
+  if(mode==='single'){
+    value=1;round=1;history=[{round:1,value:1,error:error(1)}];renderSingle();makeSingleOptions();
+    document.getElementById('feedback').className='muted';document.getElementById('feedback').textContent='Policz wynik w głowie lub na kartce.';
+  }else startMulti();
+}
+
+document.getElementById('a').onclick=e=>chooseSingle(e.currentTarget);
+document.getElementById('b').onclick=e=>chooseSingle(e.currentTarget);
+document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);
+document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);
+document.getElementById('continuePass').onclick=continuePass;
+document.getElementById('nextRound').onclick=nextMultiRound;
+document.getElementById('restart').onclick=reset;
+document.getElementById('mode1').onclick=()=>{
+  mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');
+  document.getElementById('singleMode').classList.remove('hidden');document.getElementById('multiMode').classList.add('hidden');
+  document.getElementById('subtitle').textContent='Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.';
+  reset();
+};
+document.getElementById('mode2').onclick=()=>{
+  mode='multi';document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');startMulti();
+};
+
 renderSingle();makeSingleOptions();
 </script>
 </body>
