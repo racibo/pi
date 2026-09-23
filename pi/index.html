@@ -44,32 +44,38 @@ const PI=Math.PI;
 let value=1, round=1, alive=true;
 const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10});
 const exact=n=>Math.abs(n-PI);
-const candidates=[0.5,0.75,0.9,0.95,0.98,0.99,0.995,0.999,0.9995,1.001,1.005,1.01,1.02,1.05,1.1,1.2,1.5,2,2.5,3,3.14,3.15,4];
+const integerCandidates=[2,3,4];
+const fractionalCandidates=[0.5,0.75,0.9,0.95,0.98,0.99,0.995,0.999,0.9995,1.001,1.005,1.01,1.02,1.05,1.1,1.2,1.5,2,2.5,3,3.14,3.15,4];
 function operationForRatio(r){
   if(r>=1) return {op:'×',factor:r,label:'× '+fmt(r),result:value*r};
   return {op:'÷',factor:r,label:'÷ '+fmt(r),result:value/r};
 }
 function makeOptions(){
   const ratio=PI/value;
-  let good=operationForRatio(ratio);
-  // Zaokrąglamy czynnik: gracz musi rzeczywiście liczyć, ale nie dostaje rozwiązania "pi" z nieskończoną precyzją.
-  const precision = Math.abs(value-PI)<0.02 ? 5 : (Math.abs(value-PI)<0.2 ? 4 : 3);
-  const p=10**precision;
-  const rounded=Math.round(ratio*p)/p;
-  good=operationForRatio(rounded);
-  if(exact(good.result)>=exact(value)){
-    const eps=ratio>=1 ? 1/p : -1/p;
-    good=operationForRatio(Math.round((ratio+eps)*p)/p);
+  // Dopóki da się zrobić ruch całkowity, używamy wyłącznie liczb całkowitych.
+  // Gdy żadne działanie na liczbach całkowitych nie przybliża do π, przechodzimy na ułamki.
+  const integerOptions=integerCandidates.map(v=>[
+    {op:'×',factor:v,label:'× '+fmt(v),result:value*v},
+    {op:'÷',factor:v,label:'÷ '+fmt(v),result:value/v}
+  ]).flat();
+  let good=integerOptions.filter(o=>exact(o.result)<exact(value)).sort((a,b)=>exact(a.result)-exact(b.result))[0];
+  let pool=integerOptions;
+  if(!good){
+    const precision = Math.abs(value-PI)<0.02 ? 5 : (Math.abs(value-PI)<0.2 ? 4 : 3);
+    const p=10**precision;
+    const rounded=Math.round(ratio*p)/p;
+    good=operationForRatio(rounded);
+    if(exact(good.result)>=exact(value)){
+      const eps=ratio>=1 ? 1/p : -1/p;
+      good=operationForRatio(Math.round((ratio+eps)*p)/p);
+    }
+    pool=fractionalCandidates.map(v=>[
+      {op:'×',factor:v,label:'× '+fmt(v),result:value*v},
+      {op:'÷',factor:v,label:'÷ '+fmt(v),result:value/v}
+    ]).flat();
   }
-  let bad;
-  const away=candidates.map(v=> {
-    const mul=value*v, div=value/v;
-    return [
-      {op:'×',factor:v,label:'× '+fmt(v),result:mul},
-      {op:'÷',factor:v,label:'÷ '+fmt(v),result:div}
-    ];
-  }).flat().filter(o=>Math.abs(o.result-PI)>Math.abs(good.result-PI)*1.8+0.000001);
-  bad=away[Math.floor(Math.random()*away.length)] || {op:'×',factor:2,label:'× 2',result:value*2};
+  let bad=pool.filter(o=>Math.abs(o.result-PI)>Math.abs(good.result-PI)*1.8+0.000001);
+  bad=bad[Math.floor(Math.random()*bad.length)] || pool.find(o=>o!==good && exact(o.result)>exact(value)) || {op:'×',factor:4,label:'× 4',result:value*4};
   let arr=[good,bad];
   if(Math.random()<.5) arr.reverse();
   document.getElementById('a').textContent=arr[0].label;
