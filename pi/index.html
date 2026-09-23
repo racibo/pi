@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Droga do π</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#24324a,#0d1117 60%);color:#f4f7fb;padding:18px}
+.card{width:min(620px,100%);background:rgba(20,26,36,.94);border:1px solid #394456;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
+h1{margin:0 0 6px;text-align:center;font-size:34px}.sub{text-align:center;color:#aeb9c8;margin:0 0 24px}
+.target{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0 24px}
+.pi{font-size:48px;font-weight:800}.target span{color:#9eabbc}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px}.stat{background:#111720;border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
+.prompt{text-align:center;color:#c9d2df;margin-bottom:14px}.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:16px;padding:20px 12px;font-size:22px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-2px);background:#222d3e;border-color:#71809a}
+button:disabled{cursor:default;opacity:.65;transform:none}
+#feedback{text-align:center;min-height:64px;margin-top:20px;font-size:17px;line-height:1.45}
+.good{color:#7ee2a8}.bad{color:#ff9d9d}.muted{color:#aeb9c8}
+.actions{display:flex;justify-content:center;margin-top:8px}.restart{font-size:16px;padding:11px 18px;display:none}
+@media(max-width:500px){.card{padding:20px}.pi{font-size:40px}.stats{grid-template-columns:1fr}.options{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>Droga do π</h1>
+  <p class="sub">Wybierz działanie, które najbardziej przybliży aktualną liczbę do π.</p>
+  <div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
+  <div class="stats">
+    <div class="stat"><small>Aktualna liczba</small><b id="value">1</b></div>
+    <div class="stat"><small>Błąd</small><b id="error">2,141592654</b></div>
+    <div class="stat"><small>Runda</small><b id="round">1</b></div>
+  </div>
+  <div class="prompt">Które działanie wybierasz?</div>
+  <div class="options">
+    <button id="a"></button><button id="b"></button>
+  </div>
+  <div id="feedback" class="muted">Policz wynik w głowie lub na kartce.</div>
+  <div class="actions"><button class="restart" id="restart">Zagraj ponownie</button></div>
+</main>
+<script>
+const PI=Math.PI;
+let value=1, round=1, alive=true;
+const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10});
+const exact=n=>Math.abs(n-PI);
+const candidates=[0.5,0.75,0.9,0.95,0.98,0.99,0.995,0.999,0.9995,1.001,1.005,1.01,1.02,1.05,1.1,1.2,1.5,2,2.5,3,3.14,3.15,4];
+function operationForRatio(r){
+  if(r>=1) return {op:'×',factor:r,label:'× '+fmt(r),result:value*r};
+  return {op:'÷',factor:r,label:'÷ '+fmt(r),result:value/r};
+}
+function makeOptions(){
+  const ratio=PI/value;
+  let good=operationForRatio(ratio);
+  // Zaokrąglamy czynnik: gracz musi rzeczywiście liczyć, ale nie dostaje rozwiązania "pi" z nieskończoną precyzją.
+  const precision = Math.abs(value-PI)<0.02 ? 5 : (Math.abs(value-PI)<0.2 ? 4 : 3);
+  const p=10**precision;
+  const rounded=Math.round(ratio*p)/p;
+  good=operationForRatio(rounded);
+  if(exact(good.result)>=exact(value)){
+    const eps=ratio>=1 ? 1/p : -1/p;
+    good=operationForRatio(Math.round((ratio+eps)*p)/p);
+  }
+  let bad;
+  const away=candidates.map(v=> {
+    const mul=value*v, div=value/v;
+    return [
+      {op:'×',factor:v,label:'× '+fmt(v),result:mul},
+      {op:'÷',factor:v,label:'÷ '+fmt(v),result:div}
+    ];
+  }).flat().filter(o=>Math.abs(o.result-PI)>Math.abs(good.result-PI)*1.8+0.000001);
+  bad=away[Math.floor(Math.random()*away.length)] || {op:'×',factor:2,label:'× 2',result:value*2};
+  let arr=[good,bad];
+  if(Math.random()<.5) arr.reverse();
+  document.getElementById('a').textContent=arr[0].label;
+  document.getElementById('b').textContent=arr[1].label;
+  document.getElementById('a').dataset.good=arr[0]===good;
+  document.getElementById('b').dataset.good=arr[1]===good;
+}
+function render(){
+  document.getElementById('value').textContent=fmt(value);
+  document.getElementById('error').textContent=fmt(exact(value));
+  document.getElementById('round').textContent=round;
+}
+function choose(btn){
+  if(!alive)return;
+  const good=btn.dataset.good==='true';
+  document.querySelectorAll('.options button').forEach(b=>b.disabled=true);
+  const feedback=document.getElementById('feedback');
+  if(!good){
+    alive=false;
+    const op=btn.textContent;
+    let result;
+    if(op[0]==='×') result=value*parseFloat(op.slice(2).replace(',','.'));
+    else result=value/parseFloat(op.slice(2).replace(',','.'));
+    feedback.className='bad';
+    feedback.innerHTML='<b>Nie tym razem.</b><br>'+op+' daje '+fmt(result)+', więc oddala nas od π. Błąd: '+fmt(exact(result))+'.';
+    document.getElementById('restart').style.display='inline-block';
+    return;
+  }
+  const op=btn.textContent;
+  const factor=parseFloat(op.slice(2).replace(',','.'));
+  const old=value;
+  value=op[0]==='×'?value*factor:value/factor;
+  const improvement=exact(old)-exact(value);
+  round++;
+  render();
+  if(exact(value)<0.000001){
+    alive=false;
+    feedback.className='good';
+    feedback.innerHTML='<b>🎯 Trafione!</b><br>Osiągnąłeś błąd mniejszy niż 0,000001. Wynik: '+fmt(value)+'.';
+    document.getElementById('restart').style.display='inline-block';
+    return;
+  }
+  feedback.className='good';
+  feedback.innerHTML='<b>Dobrze!</b> Błąd zmniejszył się o '+fmt(improvement)+'. Następna decyzja…';
+  setTimeout(()=>{ if(alive){document.querySelectorAll('.options button').forEach(b=>b.disabled=false); makeOptions(); feedback.className='muted'; feedback.textContent='Policz wynik w głowie lub na kartce.';}},420);
+}
+document.getElementById('a').onclick=e=>choose(e.currentTarget);
+document.getElementById('b').onclick=e=>choose(e.currentTarget);
+document.getElementById('restart').onclick=()=>{value=1;round=1;alive=true;document.getElementById('restart').style.display='none';document.querySelectorAll('.options button').forEach(b=>b.disabled=false);render();makeOptions();document.getElementById('feedback').className='muted';document.getElementById('feedback').textContent='Policz wynik w głowie lub na kartce.';};
+render();makeOptions();
+</script>
+</body>
+</html>
