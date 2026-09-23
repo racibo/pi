@@ -18,7 +18,7 @@ h1{margin:0 0 6px;text-align:center;font-size:34px}
 .modebar button.active{background:#2a3547;border-color:#8b9bb2}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
 .stat{background:#111720;border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
-.players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.base-number{text-align:center;background:#111720;border-radius:16px;padding:14px;margin-bottom:14px}.base-number small{display:block;color:#8f9baa;font-size:11px;letter-spacing:.08em}.base-number b{display:block;font-size:38px;font-weight:900;margin-top:3px}.base-number span{display:block;color:#aeb9c8;font-size:12px;margin-top:2px}.players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .player{background:#111720;border-radius:14px;padding:12px;text-align:center;border:1px solid transparent}
 .player.leading{border-color:#7ee2a8}.player.losing{border-color:#ff9d9d}
 .player-name{font-weight:800;margin-bottom:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:32px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
@@ -85,14 +85,123 @@ function chooseSingle(btn){const op=btn.dataset.op,f=Number(btn.dataset.factor),
 
 function makeSharedOptions(){const pool=candidateIntegers().flatMap(f=>[{op:'×',factor:f,label:'× '+fmt(f)},{op:'÷',factor:f,label:'÷ '+fmt(f)}]);let a=pool[Math.floor(Math.random()*pool.length)],b=pool.find(o=>o.op!==a.op||o.factor!==a.factor)||{op:'×',factor:2,label:'× 2'};if(Math.random()<.5)[a,b]=[b,a];sharedOptions=[a,b];setButtons('ma','mb',a,b)}
 function otherPlayer(){return activePlayer===1?2:1}
-function renderMulti(){document.getElementById('multiRound').textContent=multiRound;document.getElementById('p1Value').textContent=fmt(p1);document.getElementById('p2Value').textContent=fmt(p2);const e1=error(p1),e2=error(p2);document.getElementById('p1Error').textContent=fmt(e1);document.getElementById('p2Error').textContent=fmt(e2);document.getElementById('nextPlayer').textContent='Gracz '+firstPlayer;document.getElementById('lead').textContent=e1===e2?'remis':(e1<e2?'G1 + ':'G2 + ')+fmt(Math.abs(e1-e2));document.getElementById('p1Card').className='player '+(e1<e2?'leading':e1>e2?'losing':'');document.getElementById('p2Card').className='player '+(e2<e1?'leading':e2>e1?'losing':'');document.getElementById('p1Turn').textContent=firstPlayer===1?'pierwszy wybór':'';document.getElementById('p2Turn').textContent=firstPlayer===2?'pierwszy wybór':'';drawMultiChart()}
-function drawMultiChart(){const svg=document.getElementById('multiChart'),w=640,h=280,left=48,right=18,top=18,bottom=34,iw=w-left-right,ih=h-top-bottom,all=multiHistory.flatMap(x=>[x.p1Error,x.p2Error]),maxE=Math.max(...all,.000001),y=e=>top+(e/maxE)*ih,x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw,poly=k=>multiHistory.map((d,i)=>x(i)+','+y(d[k])).join(' ');let s='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+ih)+'" stroke="#394456"/><line x1="'+left+'" y1="'+(top+ih)+'" x2="'+(left+iw)+'" y2="'+(top+ih)+'" stroke="#394456"/><text x="'+(left-6)+'" y="'+(top+5)+'" text-anchor="end" fill="#7f8b9a" font-size="11">'+fmt(maxE)+'</text><text x="'+(left-6)+'" y="'+(top+ih+4)+'" text-anchor="end" fill="#7f8b9a" font-size="11">0</text>';if(multiHistory.length>1){s+='<polyline points="'+poly('p1Error')+'" fill="none" stroke="#7ee2a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polyline points="'+poly('p2Error')+'" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'}multiHistory.forEach((d,i)=>{const xx=x(i);s+='<circle cx="'+xx+'" cy="'+y(d.p1Error)+'" r="4" fill="#7ee2a8"/><circle cx="'+xx+'" cy="'+y(d.p2Error)+'" r="4" fill="#ff9d9d"/>'});svg.innerHTML=s}
-function startMulti(){p1=1;p2=1;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};multiHistory=[{round:1,p1Error:error(1),p2Error:error(1)}];document.getElementById('singleMode').classList.add('hidden');document.getElementById('multiMode').classList.remove('hidden');document.getElementById('subtitle').textContent='Dwóch graczy, jeden telefon. Odpowiedzi są ujawniane dopiero po obu wyborach.';document.getElementById('multiPlay').classList.remove('hidden');document.getElementById('passScreen').classList.remove('show');document.getElementById('reveal').classList.remove('show');makeSharedOptions();renderMulti();showTurn()}
-function showTurn(){activePlayer=firstPlayer;document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera teraz.';document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false}
-function chooseMulti(btn){const player=activePlayer;answer[player]={op:btn.dataset.op,factor:Number(btn.dataset.factor)};document.getElementById('ma').disabled=true;document.getElementById('mb').disabled=true;document.getElementById('multiPlay').classList.add('hidden');const other=otherPlayer();if(answer[other]===null){document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Teraz kolej na Gracza '+other+'.';document.getElementById('passScreen').classList.add('show')}else revealRound()}
-function continuePass(){activePlayer=otherPlayer();document.getElementById('passScreen').classList.remove('show');document.getElementById('multiPlay').classList.remove('hidden');document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera teraz.';document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false}
-function revealRound(){p1=answer[1].op==='×'?p1*answer[1].factor:p1/answer[1].factor;p2=answer[2].op==='×'?p2*answer[2].factor:p2/answer[2].factor;const e1=error(p1),e2=error(p2);multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2});renderMulti();document.getElementById('revealTitle').textContent=e1===e2?'Remis':e1<e2?'Prowadzi Gracz 1':'Prowadzi Gracz 2';document.getElementById('revealText').textContent='G1: '+fmt(p1)+' · błąd '+fmt(e1)+'\nG2: '+fmt(p2)+' · błąd '+fmt(e2);document.getElementById('reveal').classList.add('show')}
-function nextMultiRound(){const e1=error(p1),e2=error(p2);if(e1>e2)firstPlayer=1;else if(e2>e1)firstPlayer=2;else firstPlayer=firstPlayer===1?2:1;multiRound++;activePlayer=firstPlayer;answer={1:null,2:null};makeSharedOptions();document.getElementById('reveal').classList.remove('show');document.getElementById('multiPlay').classList.remove('hidden');renderMulti();showTurn()}
+function renderMulti(){
+  document.getElementById('multiRound').textContent=multiRound;
+  document.getElementById('baseValue').textContent=fmt(base);
+  document.getElementById('p1Value').textContent=p1Result===null?'—':fmt(p1Result);
+  document.getElementById('p2Value').textContent=p2Result===null?'—':fmt(p2Result);
+  document.getElementById('p1Error').textContent=p1Result===null?'—':fmt(error(p1Result));
+  document.getElementById('p2Error').textContent=p2Result===null?'—':fmt(error(p2Result));
+  const e1=p1Result===null?Infinity:error(p1Result),e2=p2Result===null?Infinity:error(p2Result);
+  const lead=document.getElementById('lead');
+  if(p1Result===null||p2Result===null) lead.textContent='—';
+  else if(e1===e2) lead.textContent='remis';
+  else lead.textContent=(e1<e2?'G1 + ':'G2 + ')+fmt(Math.abs(e1-e2));
+  document.getElementById('p1Card').className='player '+(p1Result!==null&&p2Result!==null?(e1<e2?'leading':e1>e2?'losing':''):'');
+  document.getElementById('p2Card').className='player '+(p1Result!==null&&p2Result!==null?(e2<e1?'leading':e2>e1?'losing':''):'');
+  document.getElementById('p1Turn').textContent=firstPlayer===1&&!roundResolved?'pierwszy wybór':'';
+  document.getElementById('p2Turn').textContent=firstPlayer===2&&!roundResolved?'pierwszy wybór':'';
+  drawMultiChart();
+}
+
+function drawMultiChart(){
+  const svg=document.getElementById('multiChart'),w=640,h=280,left=48,right=18,top=18,bottom=34,iw=w-left-right,ih=h-top-bottom;
+  const all=multiHistory.flatMap(x=>[x.p1Error,x.p2Error]);
+  const maxE=Math.max(...all,0.000001);
+  const y=e=>top+(e/maxE)*ih;
+  const x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw;
+  let s='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+ih)+'" stroke="#394456"/><line x1="'+left+'" y1="'+(top+ih)+'" x2="'+(left+iw)+'" y2="'+(top+ih)+'" stroke="#394456"/>';
+  s+='<text x="'+(left-6)+'" y="'+(top+5)+'" text-anchor="end" fill="#7f8b9a" font-size="11">'+fmt(maxE)+'</text><text x="'+(left-6)+'" y="'+(top+ih+4)+'" text-anchor="end" fill="#7f8b9a" font-size="11">0</text>';
+  if(multiHistory.length>1){
+    s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p1Error)).join(' ')+'" fill="none" stroke="#7ee2a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p2Error)).join(' ')+'" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  multiHistory.forEach((d,i)=>{
+    const xx=x(i), y1=y(d.p1Error), y2=y(d.p2Error);
+    s+='<circle cx="'+xx+'" cy="'+y1+'" r="5" fill="#7ee2a8"/><circle cx="'+xx+'" cy="'+y2+'" r="5" fill="#ff9d9d"/>';
+    const winner=d.winner==='remis'?'REMIS':d.winner==='G1'?'G1':'G2';
+    s+='<text x="'+xx+'" y="'+(top+ih+24)+'" text-anchor="middle" fill="#c9d2df" font-size="11">R'+d.round+' · '+winner+'</text>';
+  });
+  svg.innerHTML=s;
+}
+
+function startMulti(){
+  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];
+  document.getElementById('singleMode').classList.add('hidden');
+  document.getElementById('multiMode').classList.remove('hidden');
+  document.getElementById('subtitle').textContent='Wspólna liczba bazowa. Te same dwa działania. Najpierw wybiera jeden gracz, potem drugi.';
+  document.getElementById('multiPlay').classList.remove('hidden');
+  document.getElementById('passScreen').classList.remove('show');
+  document.getElementById('reveal').classList.remove('show');
+  makeSharedOptions();renderMulti();showTurn();
+}
+
+function showTurn(){
+  activePlayer=firstPlayer;
+  document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera pierwszy.';
+  document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
+  document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+}
+
+function chooseMulti(btn){
+  if(roundResolved)return;
+  const player=activePlayer;
+  answer[player]={op:btn.dataset.op,factor:Number(btn.dataset.factor),label:btn.textContent};
+  document.getElementById('ma').disabled=true;document.getElementById('mb').disabled=true;
+  document.getElementById('multiPlay').classList.add('hidden');
+  const other=player===1?2:1;
+  if(answer[other]===null){
+    document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Graczowi '+other+'.';
+    document.getElementById('passScreen').classList.add('show');
+  }else{
+    revealRound();
+  }
+}
+
+function continuePass(){
+  if(answer[1]!==null&&answer[2]!==null)return;
+  activePlayer=activePlayer===1?2:1;
+  document.getElementById('passScreen').classList.remove('show');
+  document.getElementById('multiPlay').classList.remove('hidden');
+  document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera teraz.';
+  document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
+  document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+}
+
+function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
+
+function revealRound(){
+  if(answer[1]===null||answer[2]===null||roundResolved)return;
+  roundResolved=true;
+  p1Result=applyOperation(base,answer[1]);
+  p2Result=applyOperation(base,answer[2]);
+  const e1=error(p1Result),e2=error(p2Result);
+  const winner=e1===e2?'remis':e1<e2?'G1':'G2';
+  multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2,winner});
+  renderMulti();
+  const same=answer[1].op===answer[2].op&&answer[1].factor===answer[2].factor;
+  const title=document.getElementById('revealTitle');
+  const text=document.getElementById('revealText');
+  title.textContent=winner==='remis'?'Remis':winner==='G1'?'Rundę wygrywa Gracz 1':'Rundę wygrywa Gracz 2';
+  text.textContent='Liczba bazowa: '+fmt(base)+'\\nG1: '+answer[1].label+' = '+fmt(p1Result)+' · błąd '+fmt(e1)+'\\nG2: '+answer[2].label+' = '+fmt(p2Result)+' · błąd '+fmt(e2)+'\\n'+(same?'Obaj wybrali to samo działanie.':'Gracze wybrali różne działania.');
+  document.getElementById('passScreen').classList.remove('show');
+  document.getElementById('multiPlay').classList.add('hidden');
+  document.getElementById('reveal').classList.add('show');
+}
+
+function nextMultiRound(){
+  if(!roundResolved)return;
+  const e1=error(p1Result),e2=error(p2Result);
+  if(e1<e2){base=p1Result;firstPlayer=2}
+  else if(e2<e1){base=p2Result;firstPlayer=1}
+  else{base=p1Result;firstPlayer=firstPlayer===1?2:1}
+  multiRound++;activePlayer=firstPlayer;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;
+  makeSharedOptions();
+  document.getElementById('reveal').classList.remove('show');
+  document.getElementById('multiPlay').classList.remove('hidden');
+  renderMulti();showTurn();
+}
+
 function reset(){if(mode==='single'){value=1;round=1;history=[{round:1,value:1,error:error(1)}];renderSingle();makeSingleOptions()}else startMulti()}
 document.getElementById('a').onclick=e=>chooseSingle(e.currentTarget);document.getElementById('b').onclick=e=>chooseSingle(e.currentTarget);document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);document.getElementById('continuePass').onclick=continuePass;document.getElementById('nextRound').onclick=nextMultiRound;document.getElementById('restart').onclick=reset;
 document.getElementById('mode1').onclick=()=>{mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');document.getElementById('singleMode').classList.remove('hidden');document.getElementById('multiMode').classList.add('hidden');document.getElementById('subtitle').textContent='Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.';reset()};
