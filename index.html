@@ -25,7 +25,7 @@ h1{margin:0 0 6px;text-align:center;font-size:34px}
 .chart-wrap{background:#111720;border-radius:16px;padding:12px;margin-bottom:18px}
 .chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:4px}
 .chart-help{text-align:center;color:#7f8b9a;font-size:12px;margin-bottom:4px}
-#chart{display:block;width:100%;height:260px}#multiChart{display:block;width:100%;height:280px}
+#chart{display:block;width:100%;height:260px}#multiChart{display:block;width:100%;height:280px}#multiChart{display:block;width:100%;height:280px}
 .prompt{text-align:center;color:#c9d2df;margin-bottom:14px}.current-operation-label{text-align:center;font-size:12px;font-weight:800;letter-spacing:.04em;color:#7ee2a8;margin:2px 0 8px}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:16px;padding:20px 12px;font-size:22px;font-weight:700;cursor:pointer;transition:.15s}
@@ -75,7 +75,15 @@ button:disabled{opacity:.55;cursor:default;transform:none}
       <div class="stat"><small>Teraz wybiera</small><b id="nextPlayer">Gracz 1</b></div>
     </div>
 
+
     <div class="base-number"><small>WSPÓLNA LICZBA BAZOWA</small><b id="baseValue">1</b><span>Obaj gracze wykonują działanie na tej samej liczbie</span></div>
+
+    <div id="multiPlay">
+      <div class="current-operation-label">DZIAŁANIE WYKONASZ NA SWOJEJ LICZBIE POWYŻEJ</div>
+      <div class="prompt" id="multiPrompt">Gracz 1 wybiera pierwszy.</div>
+      <div class="options"><button id="ma" type="button"></button><button id="mb" type="button"></button></div>
+    </div>
+
     <div class="players">
       <div class="player" id="p1Card">
         <div class="player-name">Gracz 1</div>
@@ -99,11 +107,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
       <svg id="multiChart" viewBox="0 0 640 280" aria-label="Liniowy wykres odległości obu graczy od pi"></svg>
     </div>
 
-    <div id="multiPlay">
-      <div class="current-operation-label">DZIAŁANIE WYKONASZ NA SWOJEJ LICZBIE POWYŻEJ</div>
-      <div class="prompt" id="multiPrompt">Gracz 1 wybiera pierwszy.</div>
-      <div class="options"><button id="ma" type="button"></button><button id="mb" type="button"></button></div>
-    </div>
+
 
     <div id="passScreen" class="pass">
       <h2>Przekaż telefon</h2>
@@ -133,7 +137,7 @@ let mode='single';
 let value=1,round=1,history=[{round:1,value:1,error:error(1)}];
 
 let base=1,p1Result=null,p2Result=null,multiRound=1,multiHistory=[];
-let firstPlayer=1,activePlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false,turnStage=0;
+let firstPlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false,turnStage=0;
 
 function candidateIntegers(){
   const result=[];
@@ -201,8 +205,11 @@ function makeSharedOptions(){
   setButtons('ma','mb',first,second);
 }
 
-function currentPlayer(){return activePlayer}
-function otherPlayer(){return activePlayer===1?2:1}
+function currentTurnPlayer(){
+  if(turnStage===1)return firstPlayer;
+  if(turnStage===2)return firstPlayer===1?2:1;
+  return null;
+}
 
 function renderMulti(){
   document.getElementById('multiRound').textContent=multiRound;
@@ -245,7 +252,7 @@ function drawMultiChart(){
 }
 
 function startMulti(){
-  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;activePlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];turnStage=0;
+  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];turnStage=0;
   document.getElementById('singleMode').classList.add('hidden');
   document.getElementById('multiMode').classList.remove('hidden');
   document.getElementById('subtitle').textContent='Wspólna liczba bazowa. Te same dwa działania. Najpierw wybiera jeden gracz, potem drugi.';
@@ -256,10 +263,10 @@ function startMulti(){
 }
 
 function showTurn(){
-  activePlayer=firstPlayer;
   turnStage=1;
-  document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera pierwszy.';
-  document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
+  const player=currentTurnPlayer();
+  document.getElementById('multiPrompt').textContent='Gracz '+player+' wybiera pierwszy.';
+  document.getElementById('nextPlayer').textContent='Gracz '+player;
   document.getElementById('passScreen').classList.remove('show');
   document.getElementById('reveal').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
@@ -268,23 +275,18 @@ function showTurn(){
 }
 
 function chooseMulti(btn){
-  if(roundResolved || turnStage===0)return;
-
-  const player=activePlayer;
-  answer[player]={
-    op:btn.dataset.op,
-    factor:Number(btn.dataset.factor),
-    label:btn.textContent
-  };
-
+  if(roundResolved)return;
+  const player=currentTurnPlayer();
+  if(player===null || answer[player]!==null)return;
+  answer[player]={op:btn.dataset.op,factor:Number(btn.dataset.factor),label:btn.textContent};
   document.getElementById('ma').disabled=true;
   document.getElementById('mb').disabled=true;
   document.getElementById('multiPlay').classList.add('hidden');
 
   if(turnStage===1){
     turnStage=2;
-    activePlayer=player===1?2:1;
-    document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Gracz '+activePlayer+'.';
+    const nextPlayer=currentTurnPlayer();
+    document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Gracz '+nextPlayer+'.';
     document.getElementById('passScreen').classList.add('show');
     return;
   }
@@ -297,10 +299,11 @@ function chooseMulti(btn){
 
 function continuePass(){
   if(turnStage!==2)return;
+  const player=currentTurnPlayer();
   document.getElementById('passScreen').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
-  document.getElementById('multiPrompt').textContent='Gracz '+activePlayer+' wybiera teraz.';
-  document.getElementById('nextPlayer').textContent='Gracz '+activePlayer;
+  document.getElementById('multiPrompt').textContent='Gracz '+player+' wybiera teraz.';
+  document.getElementById('nextPlayer').textContent='Gracz '+player;
   document.getElementById('ma').disabled=false;
   document.getElementById('mb').disabled=false;
 }
@@ -332,7 +335,7 @@ function nextMultiRound(){
   if(e1<e2){base=p1Result;firstPlayer=2}
   else if(e2<e1){base=p2Result;firstPlayer=1}
   else{base=p1Result;firstPlayer=firstPlayer===1?2:1}
-  multiRound++;activePlayer=firstPlayer;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;turnStage=0;
+  multiRound++;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;turnStage=0;
   makeSharedOptions();
   document.getElementById('reveal').classList.remove('show');
   document.getElementById('multiPlay').classList.remove('hidden');
@@ -363,6 +366,25 @@ document.getElementById('mode2').onclick=()=>{
   mode='multi';document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');startMulti();
 };
 
+function multiLogicSelfTest(){
+  const fail=[];
+  const check=(ok,msg)=>{if(!ok)fail.push(msg)};
+  const other=p=>p===1?2:1;
+  check(other(1)===2 && other(2)===1,'zamiana graczy');
+  for(const fp of [1,2]){
+    const first=fp,second=other(fp);
+    check(first!==second,'kolejność tur');
+    const a={1:null,2:null};
+    a[first]={op:'×',factor:2};
+    check(a[first]!==null && a[second]===null,'pierwsza odpowiedź trafia do właściwego gracza');
+    a[second]={op:'÷',factor:2};
+    check(a[1]!==null && a[2]!==null,'druga odpowiedź trafia do drugiego gracza');
+  }
+  console.info(fail.length?'AUDYT 2 GRACZY — BŁĘDY:':'AUDYT 2 GRACZY — OK',fail);
+  return fail.length===0;
+}
+
+multiLogicSelfTest();
 renderSingle();makeSingleOptions();
 </script>
 </body>
