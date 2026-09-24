@@ -156,6 +156,7 @@ h1{font-size:25px;margin-bottom:2px}
 <script>
 const PI=Math.PI;
 const MIN_GAME_VALUE=0.01;
+const MAX_GAME_VALUE=10000;
 const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:4});
 const error=n=>Math.abs(n-PI);
 const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:value/factor,label:op+' '+fmt(factor)});
@@ -175,7 +176,7 @@ function candidateIntegers(){
 
 function makePool(base){
   return candidateIntegers().flatMap(f=>[operation('×',f,base),operation('÷',f,base)])
-    .filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE);
+    .filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE&&o.result<=MAX_GAME_VALUE);
 }
 
 function makeSingleOptions(){
@@ -226,10 +227,10 @@ function chooseSingle(btn){
 function makeSharedOptions(){
   // Te same działania muszą być bezpieczne dla obu własnych liczb graczy.
   const pool=candidateIntegers().flatMap(f=>[operation('×',f,base1),operation('÷',f,base1)])
-    .filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE)
+    .filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE&&o.result<=MAX_GAME_VALUE)
     .filter(o=>{
       const r2=applyOperation(base2,{op:o.op,factor:o.factor});
-      return Number.isFinite(r2)&&r2>=MIN_GAME_VALUE;
+      return Number.isFinite(r2)&&r2>=MIN_GAME_VALUE&&r2<=MAX_GAME_VALUE;
     });
   const pairs=[],maxDiff=Math.max(0.02,0.15-(multiRound-1)*0.01);
   for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++){
@@ -239,8 +240,8 @@ function makeSharedOptions(){
   let chosen=pairs.length?pairs[Math.floor(Math.random()*pairs.length)]:null;
   if(!chosen&&pool.length>=2)chosen={x:pool[0],y:pool[1]};
   if(!chosen){
-    const safe=pool.filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE);
-    chosen=safe.length>=2?{x:safe[0],y:safe[1]}:{x:operation('×',2,base1),y:operation('×',3,base1)};
+    const safe=pool.filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE&&o.result<=MAX_GAME_VALUE);
+    chosen=safe.length>=2?{x:safe[0],y:safe[1]}:{x:operation('÷',2,base1),y:operation('÷',3,base1)};
   }
   let x={op:chosen.x.op,factor:chosen.x.factor,label:chosen.x.label},y={op:chosen.y.op,factor:chosen.y.factor,label:chosen.y.label};
   if(Math.random()<.5)[x,y]=[y,x];
