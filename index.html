@@ -142,6 +142,7 @@ h1{font-size:25px;margin-bottom:2px}
 
 <script>
 const PI=Math.PI;
+const MIN_GAME_VALUE=0.01;
 const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:4});
 const error=n=>Math.abs(n-PI);
 const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:value/factor,label:op+' '+fmt(factor)});
@@ -161,7 +162,7 @@ function candidateIntegers(){
 
 function makePool(base){
   return candidateIntegers().flatMap(f=>[operation('×',f,base),operation('÷',f,base)])
-    .filter(o=>Number.isFinite(o.result)&&o.result>=0);
+    .filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE);
 }
 
 function makeSingleOptions(){
@@ -210,7 +211,13 @@ function chooseSingle(btn){
 }
 
 function makeSharedOptions(){
-  const pool=makePool(base1);
+  // Te same działania muszą być bezpieczne dla obu własnych liczb graczy.
+  const pool=candidateIntegers().flatMap(f=>[operation('×',f,base1),operation('÷',f,base1)])
+    .filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE)
+    .filter(o=>{
+      const r2=applyOperation(base2,{op:o.op,factor:o.factor});
+      return Number.isFinite(r2)&&r2>=MIN_GAME_VALUE;
+    });
   const pairs=[],maxDiff=Math.max(0.02,0.15-(multiRound-1)*0.01);
   for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++){
     const x=pool[i],y=pool[j],d=Math.abs(x.result-y.result)/Math.max(Math.abs(x.result),Math.abs(y.result),1e-12);
@@ -218,7 +225,10 @@ function makeSharedOptions(){
   }
   let chosen=pairs.length?pairs[Math.floor(Math.random()*pairs.length)]:null;
   if(!chosen&&pool.length>=2)chosen={x:pool[0],y:pool[1]};
-  if(!chosen)chosen={x:operation('÷',2,base1),y:operation('÷',3,base1)};
+  if(!chosen){
+    const safe=pool.filter(o=>Number.isFinite(o.result)&&o.result>=MIN_GAME_VALUE);
+    chosen=safe.length>=2?{x:safe[0],y:safe[1]}:{x:operation('×',2,base1),y:operation('×',3,base1)};
+  }
   let x={op:chosen.x.op,factor:chosen.x.factor,label:chosen.x.label},y={op:chosen.y.op,factor:chosen.y.factor,label:chosen.y.label};
   if(Math.random()<.5)[x,y]=[y,x];
   sharedOptions=[x,y];setButtons('ma','mb',x,y);
@@ -267,7 +277,7 @@ function startMulti(){
   base1=1;base2=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];score1=0;score2=0;turnStage=0;
   playerNames=[document.getElementById('name1').value.trim()||'Gracz 1',document.getElementById('name2').value.trim()||'Gracz 2'];
   document.getElementById('singleMode').classList.add('hidden');document.getElementById('multiMode').classList.remove('hidden');
-  document.getElementById('subtitle').textContent='10 rund. Każdy gracz prowadzi własną ścieżkę liczb. Małe punkty za rundy, duży punkt za cały mecz.';
+  document.getElementById('subtitle').textContent='10 rund. Małe punkty za rundy. Duży punkt za najbliższy wynik względem π.';
   document.getElementById('reveal').classList.remove('show');makeSharedOptions();renderMulti();showTurn();
 }
 function showTurn(){
@@ -282,7 +292,10 @@ function chooseMulti(btn){
 }
 function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
 function revealRound(){
-  if(answer[1]===null||answer[2]===null||roundResolved)return;roundResolved=true;p1Result=applyOperation(base1,answer[1]);p2Result=applyOperation(base2,answer[2]);
+  if(answer[1]===null||answer[2]===null||roundResolved)return;
+  const next1=applyOperation(base1,answer[1]),next2=applyOperation(base2,answer[2]);
+  if(!Number.isFinite(next1)||!Number.isFinite(next2)||next1<MIN_GAME_VALUE||next2<MIN_GAME_VALUE)return;
+  roundResolved=true;p1Result=next1;p2Result=next2;
   const e1=error(p1Result),e2=error(p2Result),w=e1===e2?'REMIS':e1<e2?'G1':'G2';if(w==='G1')score1++;else if(w==='G2')score2++;
   multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2,p1Value:p1Result,p2Value:p2Result,winner:w});renderMulti();
   document.getElementById('revealTitle').textContent=w==='REMIS'?'Remis rundy':w==='G1'?playerNames[0]+' wygrywa rundę':playerNames[1]+' wygrywa rundę';
