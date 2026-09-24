@@ -9,6 +9,11 @@
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#24324a,#0d1117 60%);color:#f4f7fb;padding:18px}
 .card{width:min(760px,100%);background:rgba(20,26,36,.94);border:1px solid #394456;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
+.screen{width:100%}.start-screen{display:block}.game-screen{display:none}.screen-title{text-align:center;font-size:24px;font-weight:800;margin:4px 0 14px}
+.rules{background:#111720;border-radius:16px;padding:14px 18px;margin:0 0 14px;color:#c9d2df;line-height:1.5}.rules strong{color:#fff}.rules ul{margin:8px 0 0;padding-left:20px}
+.start-names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.start-names input{width:100%;padding:12px;border-radius:12px;border:1px solid #465267;background:#111720;color:#fff;font-size:16px;text-align:center}
+.start-actions{display:flex;justify-content:center;margin-top:12px}#startGame{font-size:20px;padding:14px 28px;background:#26354a;border-color:#7d8fa8}.back-start{font-size:14px;padding:9px 13px}
+.best-point{stroke:#f2c94c;stroke-width:3}.best-label{fill:#f2c94c;font-size:10px;font-weight:900}
 h1{margin:0 0 6px;text-align:center;font-size:34px}
 .sub{text-align:center;color:#aeb9c8;margin:0 0 12px}
 .target{display:flex;justify-content:center;align-items:center;gap:12px;margin:6px 0 12px}
@@ -38,7 +43,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
 .pass button{font-size:18px;padding:14px 22px}
 .actions{display:none;justify-content:center;gap:8px;margin-top:4px}.restart{font-size:16px;padding:11px 18px}
 .name-inputs #confirmNames{padding:8px 12px;font-size:14px;border-radius:12px;white-space:nowrap}.hidden{display:none!important}
-@media(max-width:500px){
+@media(max-width:500px){.start-names{gap:5px}.start-names input{padding:8px;font-size:13px}.rules{padding:10px 12px;font-size:11px}.screen-title{font-size:19px;margin-bottom:9px}#startGame{font-size:16px;padding:11px 20px}
 body{padding:6px;align-items:start}
 .card{padding:10px;border-radius:16px;min-height:calc(100vh - 12px)}
 h1{font-size:25px;margin-bottom:2px}
@@ -60,15 +65,22 @@ h1{font-size:25px;margin-bottom:2px}
 </head>
 <body>
 <main class="card">
-  <h1>Droga do π</h1>
-  <p class="sub" id="subtitle">Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.</p>
-  <div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
+  <section id="startScreen" class="screen start-screen">
+    <h1>Droga do π</h1>
+    <p class="sub">Gra matematyczna: szukaj własnej drogi i próbuj wracać jak najbliżej π.</p>
+    <div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
+    <div class="screen-title">Zasady rozgrywki</div>
+    <div class="rules"><strong>Cel:</strong> po kolejnych działaniach zbliżać swoją liczbę do π.
+      <ul><li>W każdej rundzie wybierasz jedno z dwóch podobnych działań.</li><li>Po 10 rundach <strong>duży punkt</strong> trafia do gracza, który osiągnął najmniejszy błąd względem π w całej rozgrywce.</li><li>Każda runda daje mały punkt graczowi, którego wynik jest bliżej π.</li><li>Na wykresie ★ <strong>NAJBLIŻEJ</strong> oznacza najlepszy dotychczasowy wynik danego gracza.</li></ul>
+    </div>
+    <div class="modebar"><button id="mode1" type="button">1 gracz</button><button id="mode2" class="active" type="button">2 graczy · jeden telefon</button></div>
+    <div class="start-names"><input id="startName1" maxlength="18" value="Gracz 1" aria-label="Nazwa pierwszego uczestnika"><input id="startName2" maxlength="18" value="Gracz 2" aria-label="Nazwa drugiego uczestnika"></div>
+    <div class="start-actions"><button id="startGame" type="button">Rozpocznij rozgrywkę</button></div>
+  </section>
 
-  <div class="modebar">
-    <button id="mode1" type="button">1 gracz</button>
-    <button id="mode2" class="active" type="button">2 graczy · jeden telefon</button>
-  </div>
-
+  <section id="gameScreen" class="screen game-screen">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><button class="back-start" id="backStart" type="button">← Ekran startowy</button><div class="screen-title" style="margin:0">Rozgrywka</div><div style="width:110px"></div></div>
+    <p class="sub" id="subtitle">10 rund. Małe punkty za rundy. Duży punkt za najbliższy wynik względem π.</p>
   <section id="singleMode" class="hidden">
     <div class="stats">
       <div class="stat"><small>Aktualna liczba</small><b id="value">1</b></div>
@@ -86,7 +98,7 @@ h1{font-size:25px;margin-bottom:2px}
   </section>
 
   <section id="multiMode">
-    <div class="stats"><div class="stat"><small>Runda</small><b id="multiRound">1 / 10</b></div><div class="stat"><small>Małe punkty</small><b id="roundScore">0 : 0</b></div><div class="stat"><small>Wybiera</small><b id="nextPlayer">Gracz 1</b></div></div><div class="name-inputs"><input id="name1" maxlength="18" value="Gracz 1" aria-label="Nazwa Gracza 1"><input id="name2" maxlength="18" value="Gracz 2" aria-label="Nazwa Gracza 2"><button id="confirmNames" type="button">Zatwierdź</button></div>
+    <div class="stats"><div class="stat"><small>Runda</small><b id="multiRound">1 / 10</b></div><div class="stat"><small>Małe punkty</small><b id="roundScore">0 : 0</b></div><div class="stat"><small>Wybiera</small><b id="nextPlayer">Gracz 1</b></div></div>
 
 
     <div class="base-number"><small>LICZBY STARTOWE TEJ RUNDY</small><b id="baseValue">1 / 1</b><span>Każdy gracz prowadzi własną ścieżkę liczb</span></div>
@@ -116,7 +128,7 @@ h1{font-size:25px;margin-bottom:2px}
 
     <div class="chart-wrap">
       <div class="chart-title">Wyścig do π</div>
-      <div class="chart-help">π = środek · logarytmiczna odległość · każda runda pokazuje, kto był bliżej</div>
+      <div class="chart-help">★ NAJBLIŻEJ = najlepszy wynik tego gracza w całej rozgrywce · duży punkt trafia do najlepszego wyniku ze wszystkich</div>
       <svg id="multiChart" viewBox="0 0 640 280" aria-label="Liniowy wykres odległości obu graczy od pi"></svg>
     </div>
 
@@ -138,6 +150,7 @@ h1{font-size:25px;margin-bottom:2px}
   </section>
 
   <div class="actions"><button class="restart" id="restart" type="button">Zacznij od początku</button></div>
+  </section>
 </main>
 
 <script>
@@ -263,11 +276,16 @@ function drawMultiChart(){
     s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y1(d.p1Error)).join(' ')+'" fill="none" stroke="#55d6ff" stroke-width="3"/>';
     s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y2(d.p2Error)).join(' ')+'" fill="none" stroke="#ff75b5" stroke-width="3"/>';
   }
+  const best1=multiHistory.length?Math.min(...multiHistory.map(d=>d.p1Error)):Infinity;
+  const best2=multiHistory.length?Math.min(...multiHistory.map(d=>d.p2Error)):Infinity;
   multiHistory.forEach((d,i)=>{
     const xx=x(i),a=y1(d.p1Error),b=y2(d.p2Error),win1=d.winner==='G1',win2=d.winner==='G2';
-    s+='<circle cx="'+xx+'" cy="'+a+'" r="'+(win1?6:4)+'" fill="#55d6ff"/>';
-    s+='<circle cx="'+xx+'" cy="'+b+'" r="'+(win2?6:4)+'" fill="#ff75b5"/>';
-    if(win1||win2)s+='<text x="'+xx+'" y="'+(win1?a-9:b+17)+'" text-anchor="middle" fill="'+(win1?'#55d6ff':'#ff75b5')+'" font-size="10" font-weight="700">✓</text>';
+    const bestP1=Math.abs(d.p1Error-best1)<1e-12,bestP2=Math.abs(d.p2Error-best2)<1e-12;
+    s+='<circle class="'+(bestP1?'best-point':'')+'" cx="'+xx+'" cy="'+a+'" r="'+(bestP1?7:(win1?6:4))+'" fill="#55d6ff"/>';
+    s+='<circle class="'+(bestP2?'best-point':'')+'" cx="'+xx+'" cy="'+b+'" r="'+(bestP2?7:(win2?6:4))+'" fill="#ff75b5"/>';
+    if(bestP1)s+='<text class="best-label" x="'+xx+'" y="'+(a-11)+'" text-anchor="middle">★ NAJBLIŻEJ</text>';
+    if(bestP2)s+='<text class="best-label" x="'+xx+'" y="'+(b+19)+'" text-anchor="middle">★ NAJBLIŻEJ</text>';
+    if(win1||win2)s+='<text x="'+xx+'" y="'+(win1?a-22:b+31)+'" text-anchor="middle" fill="'+(win1?'#55d6ff':'#ff75b5')+'" font-size="10" font-weight="700">✓</text>';
     s+='<text x="'+xx+'" y="'+(top+ih+17)+'" text-anchor="middle" fill="#c9d2df" font-size="10">R'+d.round+'</text>';
     s+='<text x="'+xx+'" y="'+(top+ih+30)+'" text-anchor="middle" fill="#7f8b9a" font-size="9">'+(d.winner==='REMIS'?'REMIS':d.winner==='G1'?playerNames[0]:playerNames[1])+'</text>';
   });
@@ -275,7 +293,7 @@ function drawMultiChart(){
 }
 function startMulti(){
   base1=1;base2=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];score1=0;score2=0;turnStage=0;
-  playerNames=[document.getElementById('name1').value.trim()||'Gracz 1',document.getElementById('name2').value.trim()||'Gracz 2'];
+  playerNames=[document.getElementById('startName1').value.trim()||'Gracz 1',document.getElementById('startName2').value.trim()||'Gracz 2'];
   document.getElementById('singleMode').classList.add('hidden');document.getElementById('multiMode').classList.remove('hidden');
   document.getElementById('subtitle').textContent='10 rund. Małe punkty za rundy. Duży punkt za najbliższy wynik względem π.';
   document.getElementById('reveal').classList.remove('show');makeSharedOptions();renderMulti();showTurn();
@@ -341,18 +359,14 @@ document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('nextRound').onclick=()=>nextMultiRound();
 document.getElementById('restart').onclick=reset;
-document.getElementById('confirmNames').onclick=()=>startMulti();
-document.getElementById('name1').addEventListener('keydown',e=>{if(e.key==='Enter')startMulti()});
-document.getElementById('name2').addEventListener('keydown',e=>{if(e.key==='Enter')startMulti()});
-document.getElementById('mode1').onclick=()=>{
-  mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');
-  document.getElementById('singleMode').classList.remove('hidden');document.getElementById('multiMode').classList.add('hidden');
-  document.getElementById('subtitle').textContent='Możesz się oddalać. Szukaj własnej drogi i próbuj wracać jak najbliżej π.';
-  reset();
-};
-document.getElementById('mode2').onclick=()=>{
-  mode='multi';document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');startMulti();
-};
+function showGameScreen(){document.getElementById('startScreen').style.display='none';document.getElementById('gameScreen').style.display='block'}
+function showStartScreen(){document.getElementById('gameScreen').style.display='none';document.getElementById('startScreen').style.display='block'}
+document.getElementById('startGame').onclick=()=>{showGameScreen();if(mode==='single'){reset()}else startMulti()};
+document.getElementById('startName1').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startGame').click()});
+document.getElementById('startName2').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startGame').click()});
+document.getElementById('backStart').onclick=showStartScreen;
+document.getElementById('mode1').onclick=()=>{mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');document.getElementById('startName2').style.visibility='hidden';document.getElementById('startName2').style.pointerEvents='none'};
+document.getElementById('mode2').onclick=()=>{mode='multi';document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');document.getElementById('startName2').style.visibility='visible';document.getElementById('startName2').style.pointerEvents='auto'};
 
 function multiLogicSelfTest(){
   const fail=[];
@@ -373,8 +387,8 @@ function multiLogicSelfTest(){
 }
 
 multiLogicSelfTest();
-if(mode==='multi') startMulti();
-else { renderSingle(); makeSingleOptions(); }
+document.getElementById('gameScreen').style.display='none';
+document.getElementById('startScreen').style.display='block';
 </script>
 </body>
 </html>
