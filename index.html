@@ -19,9 +19,9 @@ h1{margin:0 0 6px;text-align:center;font-size:34px}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
 .stat{background:#111720;border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
 .base-number{text-align:center;background:#111720;border-radius:16px;padding:14px;margin-bottom:14px}.base-number small{display:block;color:#8f9baa;font-size:11px;letter-spacing:.08em}.base-number b{display:block;font-size:38px;font-weight:900;margin-top:3px}.base-number span{display:block;color:#aeb9c8;font-size:12px;margin-top:2px}.players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.player{background:#111720;border-radius:14px;padding:12px;text-align:center;border:1px solid transparent}
+.player{background:#111720;border-radius:14px;padding:12px;text-align:center;border:2px solid transparent}.player.p1{border-color:#55d6ff}.player.p2{border-color:#ff75b5}.player.p1 .player-name{color:#55d6ff}.player.p2 .player-name{color:#ff75b5}
 .player.leading{border-color:#7ee2a8}.player.losing{border-color:#ff9d9d}
-.player-name{font-weight:800;margin-bottom:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:32px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
+.player-name{font-weight:800;margin-bottom:4px}.name-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.name-inputs input{width:100%;padding:12px;border-radius:12px;border:1px solid #465267;background:#111720;color:#fff;font-size:16px;text-align:center}.score{font-size:12px;color:#aeb9c8;margin-top:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:32px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
 .chart-wrap{background:#111720;border-radius:16px;padding:12px;margin-bottom:18px}
 .chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:4px}
 .chart-help{text-align:center;color:#7f8b9a;font-size:12px;margin-bottom:4px}
@@ -69,14 +69,10 @@ button:disabled{opacity:.55;cursor:default;transform:none}
   </section>
 
   <section id="multiMode">
-    <div class="stats">
-      <div class="stat"><small>Runda</small><b id="multiRound">1</b></div>
-      <div class="stat"><small>Przewaga</small><b id="lead">—</b></div>
-      <div class="stat"><small>Teraz wybiera</small><b id="nextPlayer">Gracz 1</b></div>
-    </div>
+    <div class="stats"><div class="stat"><small>Runda</small><b id="multiRound">1 / 10</b></div><div class="stat"><small>Małe punkty</small><b id="roundScore">0 : 0</b></div><div class="stat"><small>Wybiera</small><b id="nextPlayer">Gracz 1</b></div></div><div class="name-inputs"><input id="name1" maxlength="18" value="Gracz 1" aria-label="Nazwa Gracza 1"><input id="name2" maxlength="18" value="Gracz 2" aria-label="Nazwa Gracza 2"></div>
 
 
-    <div class="base-number"><small>WSPÓLNA LICZBA BAZOWA</small><b id="baseValue">1</b><span>Obaj gracze wykonują działanie na tej samej liczbie</span></div>
+    <div class="base-number"><small>LICZBY STARTOWE TEJ RUNDY</small><b id="baseValue">1 / 1</b><span>Każdy gracz prowadzi własną ścieżkę liczb</span></div>
 
     <div id="multiPlay">
       <div class="current-operation-label">DZIAŁANIE WYKONASZ NA SWOJEJ LICZBIE POWYŻEJ</div>
@@ -85,19 +81,19 @@ button:disabled{opacity:.55;cursor:default;transform:none}
     </div>
 
     <div class="players">
-      <div class="player" id="p1Card">
-        <div class="player-name">Gracz 1</div>
+      <div class="player p1" id="p1Card">
+        <div class="player-name" id="p1Name">Gracz 1</div>
         <div class="current-label">LICZBA DLA TEJ RUNDY</div>
         <div class="player-value" id="p1Value">1</div>
         <div class="player-error">błąd: <span id="p1Error">2,141592654</span></div>
-        <div class="turn" id="p1Turn"></div>
+        <div class="turn" id="p1Turn"></div><div class="score" id="p1Score">Małe punkty: 0</div>
       </div>
-      <div class="player" id="p2Card">
-        <div class="player-name">Gracz 2</div>
+      <div class="player p2" id="p2Card">
+        <div class="player-name" id="p2Name">Gracz 2</div>
         <div class="current-label">LICZBA DLA TEJ RUNDY</div>
         <div class="player-value" id="p2Value">1</div>
         <div class="player-error">błąd: <span id="p2Error">2,141592654</span></div>
-        <div class="turn" id="p2Turn"></div>
+        <div class="turn" id="p2Turn"></div><div class="score" id="p2Score">Małe punkty: 0</div>
       </div>
     </div>
 
@@ -136,8 +132,8 @@ const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:val
 let mode='multi';
 let value=1,round=1,history=[{round:1,value:1,error:error(1)}];
 
-let base=1,p1Result=null,p2Result=null,multiRound=1,multiHistory=[];
-let firstPlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false,turnStage=0;
+let base1=1,base2=1,p1Result=null,p2Result=null,multiRound=1,multiHistory=[],score1=0,score2=0;
+let firstPlayer=1,answer={1:null,2:null},sharedOptions=[],roundResolved=false,turnStage=0; let playerNames=['Gracz 1','Gracz 2'];
 
 function candidateIntegers(){
   const result=[];
@@ -197,200 +193,78 @@ function chooseSingle(btn){
 }
 
 function makeSharedOptions(){
-  const pool=candidateIntegers().flatMap(f=>[
-    operation('×',f,base),
-    operation('÷',f,base)
-  ]).filter(o=>Number.isFinite(o.result)&&o.result>=0);
-
-  // W kolejnych rundach dopuszczalna różnica wyników maleje:
-  // R1 = 15%, R2 = 14%, ... minimum 2%.
-  const maxRelativeDiff=Math.max(0.02,0.15-(multiRound-1)*0.01);
-  const preferredMinRelativeDiff=maxRelativeDiff*0.35;
-  const pairs=[];
-
-  for(let i=0;i<pool.length;i++){
-    for(let j=i+1;j<pool.length;j++){
-      const a=pool[i],b=pool[j];
-      if(a.op===b.op&&a.factor===b.factor)continue;
-      const scale=Math.max(Math.abs(a.result),Math.abs(b.result),1e-12);
-      const relativeDiff=Math.abs(a.result-b.result)/scale;
-      if(relativeDiff<=maxRelativeDiff&&relativeDiff>=preferredMinRelativeDiff){
-        pairs.push({a,b,relativeDiff});
-      }
-    }
+  const pool=makePool(base1);
+  const pairs=[],maxDiff=Math.max(0.02,0.15-(multiRound-1)*0.01);
+  for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++){
+    const x=pool[i],y=pool[j],d=Math.abs(x.result-y.result)/Math.max(Math.abs(x.result),Math.abs(y.result),1e-12);
+    if((x.op!==y.op||x.factor!==y.factor)&&d<=maxDiff)pairs.push({x,y});
   }
-
-  // Jeżeli w danej rundzie nie ma pary w preferowanym zakresie,
-  // wybierz dowolną parę mieszczącą się w limicie.
-  if(!pairs.length){
-    for(let i=0;i<pool.length;i++){
-      for(let j=i+1;j<pool.length;j++){
-        const a=pool[i],b=pool[j];
-        const scale=Math.max(Math.abs(a.result),Math.abs(b.result),1e-12);
-        const relativeDiff=Math.abs(a.result-b.result)/scale;
-        if(relativeDiff<=maxRelativeDiff)pairs.push({a,b,relativeDiff});
-      }
-    }
-  }
-
-  // Awaryjnie wybierz dwie najbliższe wartości.
-  if(!pairs.length){
-    let best=null;
-    for(let i=0;i<pool.length;i++){
-      for(let j=i+1;j<pool.length;j++){
-        const a=pool[i],b=pool[j];
-        const scale=Math.max(Math.abs(a.result),Math.abs(b.result),1e-12);
-        const relativeDiff=Math.abs(a.result-b.result)/scale;
-        if(!best||relativeDiff<best.relativeDiff)best={a,b,relativeDiff};
-      }
-    }
-    if(best)pairs.push(best);
-  }
-
-  const chosen=pairs[Math.floor(Math.random()*pairs.length)];
-  const first=chosen.a,second=chosen.b;
-  if(Math.random()<.5)[first,second]=[second,first];
-  sharedOptions=[first,second];
-  setButtons('ma','mb',first,second);
+  let chosen=pairs.length?pairs[Math.floor(Math.random()*pairs.length)]:null;
+  if(!chosen&&pool.length>=2)chosen={x:pool[0],y:pool[1]};
+  if(!chosen)chosen={x:operation('÷',2,base1),y:operation('÷',3,base1)};
+  let x={op:chosen.x.op,factor:chosen.x.factor},y={op:chosen.y.op,factor:chosen.y.factor};
+  if(Math.random()<.5)[x,y]=[y,x];
+  sharedOptions=[x,y];setButtons('ma','mb',x,y);
 }
-
-function currentTurnPlayer(){
-  if(turnStage===1)return firstPlayer;
-  if(turnStage===2)return firstPlayer===1?2:1;
-  return null;
-}
-
+function currentTurnPlayer(){return turnStage===1?firstPlayer:turnStage===2?(firstPlayer===1?2:1):null}
 function renderMulti(){
-  document.getElementById('multiRound').textContent=multiRound;
-  document.getElementById('baseValue').textContent=fmt(base);
-  document.getElementById('p1Value').textContent=p1Result===null?'—':fmt(p1Result);
-  document.getElementById('p2Value').textContent=p2Result===null?'—':fmt(p2Result);
-  document.getElementById('p1Error').textContent=p1Result===null?'—':fmt(error(p1Result));
-  document.getElementById('p2Error').textContent=p2Result===null?'—':fmt(error(p2Result));
+  document.getElementById('multiRound').textContent=multiRound+' / 10';
+  document.getElementById('baseValue').textContent=fmt(base1)+' / '+fmt(base2);
+  document.getElementById('p1Name').textContent=playerNames[0];document.getElementById('p2Name').textContent=playerNames[1];
+  document.getElementById('roundScore').textContent=score1+' : '+score2;document.getElementById('p1Score').textContent='Małe punkty: '+score1;document.getElementById('p2Score').textContent='Małe punkty: '+score2;
+  document.getElementById('p1Value').textContent=p1Result===null?'—':fmt(p1Result);document.getElementById('p2Value').textContent=p2Result===null?'—':fmt(p2Result);
+  document.getElementById('p1Error').textContent=p1Result===null?'—':fmt(error(p1Result));document.getElementById('p2Error').textContent=p2Result===null?'—':fmt(error(p2Result));
   const e1=p1Result===null?Infinity:error(p1Result),e2=p2Result===null?Infinity:error(p2Result);
-  const lead=document.getElementById('lead');
-  if(p1Result===null||p2Result===null) lead.textContent='—';
-  else if(e1===e2) lead.textContent='remis';
-  else lead.textContent=(e1<e2?'G1 + ':'G2 + ')+fmt(Math.abs(e1-e2));
-  document.getElementById('p1Card').className='player '+(p1Result!==null&&p2Result!==null?(e1<e2?'leading':e1>e2?'losing':''):'');
-  document.getElementById('p2Card').className='player '+(p1Result!==null&&p2Result!==null?(e2<e1?'leading':e2>e1?'losing':''):'');
-  document.getElementById('p1Turn').textContent=firstPlayer===1&&!roundResolved?'pierwszy wybór':'';
-  document.getElementById('p2Turn').textContent=firstPlayer===2&&!roundResolved?'pierwszy wybór':'';
+  document.getElementById('lead').textContent=p1Result===null||p2Result===null?'—':e1===e2?'remis':(e1<e2?playerNames[0]+' + ':playerNames[1]+' + ')+fmt(Math.abs(e1-e2));
+  document.getElementById('p1Card').className='player p1 '+(p1Result!==null&&p2Result!==null?(e1<e2?'leading':e1>e2?'losing':''):'');
+  document.getElementById('p2Card').className='player p2 '+(p1Result!==null&&p2Result!==null?(e2<e1?'leading':e2>e1?'losing':''):'');
+  document.getElementById('p1Turn').textContent=currentTurnPlayer()===1?'teraz wybiera':'';document.getElementById('p2Turn').textContent=currentTurnPlayer()===2?'teraz wybiera':'';
   drawMultiChart();
 }
-
 function drawMultiChart(){
   const svg=document.getElementById('multiChart'),w=640,h=280,left=48,right=18,top=18,bottom=34,iw=w-left-right,ih=h-top-bottom;
-  const all=multiHistory.flatMap(x=>[x.p1Error,x.p2Error]);
-  const maxE=Math.max(...all,0.000001);
-  const y=e=>top+(e/maxE)*ih;
-  const x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw;
+  const all=multiHistory.flatMap(x=>[x.p1Error,x.p2Error]),maxE=Math.max(...all,0.000001),y=e=>top+(e/maxE)*ih,x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw;
   let s='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+ih)+'" stroke="#394456"/><line x1="'+left+'" y1="'+(top+ih)+'" x2="'+(left+iw)+'" y2="'+(top+ih)+'" stroke="#394456"/>';
-  s+='<text x="'+(left-6)+'" y="'+(top+5)+'" text-anchor="end" fill="#7f8b9a" font-size="11">'+fmt(maxE)+'</text><text x="'+(left-6)+'" y="'+(top+ih+4)+'" text-anchor="end" fill="#7f8b9a" font-size="11">0</text>';
-  if(multiHistory.length>1){
-    s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p1Error)).join(' ')+'" fill="none" stroke="#7ee2a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-    s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p2Error)).join(' ')+'" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-  }
-  multiHistory.forEach((d,i)=>{
-    const xx=x(i), y1=y(d.p1Error), y2=y(d.p2Error);
-    s+='<circle cx="'+xx+'" cy="'+y1+'" r="5" fill="#7ee2a8"/><circle cx="'+xx+'" cy="'+y2+'" r="5" fill="#ff9d9d"/>';
-    const winner=d.winner==='remis'?'REMIS':d.winner==='G1'?'G1':'G2';
-    s+='<text x="'+xx+'" y="'+(top+ih+24)+'" text-anchor="middle" fill="#c9d2df" font-size="11">R'+d.round+' · '+winner+'</text>';
-  });
-  svg.innerHTML=s;
+  if(multiHistory.length>1){s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p1Error)).join(' ')+'" fill="none" stroke="#55d6ff" stroke-width="3"/><polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p2Error)).join(' ')+'" fill="none" stroke="#ff75b5" stroke-width="3"/>'}
+  multiHistory.forEach((d,i)=>{const xx=x(i);s+='<circle cx="'+xx+'" cy="'+y(d.p1Error)+'" r="5" fill="#55d6ff"/><circle cx="'+xx+'" cy="'+y(d.p2Error)+'" r="5" fill="#ff75b5"/><text x="'+xx+'" y="'+(top+ih+24)+'" text-anchor="middle" fill="#c9d2df" font-size="11">R'+d.round+' · '+d.winner+'</text>'});svg.innerHTML=s;
 }
-
 function startMulti(){
-  base=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];turnStage=0;
-  document.getElementById('singleMode').classList.add('hidden');
-  document.getElementById('multiMode').classList.remove('hidden');
-  document.getElementById('subtitle').textContent='Wspólna liczba bazowa. Te same dwa działania. Najpierw wybiera jeden gracz, potem drugi.';
-  document.getElementById('multiPlay').classList.remove('hidden');
-  document.getElementById('passScreen').classList.remove('show');
-  document.getElementById('reveal').classList.remove('show');
+  base1=1;base2=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];score1=0;score2=0;turnStage=0;
+  playerNames=[document.getElementById('name1').value.trim()||'Gracz 1',document.getElementById('name2').value.trim()||'Gracz 2'];
+  document.getElementById('singleMode').classList.add('hidden');document.getElementById('multiMode').classList.remove('hidden');
+  document.getElementById('subtitle').textContent='10 rund. Każdy gracz prowadzi własną ścieżkę liczb. Małe punkty za rundy, duży punkt za cały mecz.';
+  document.getElementById('reveal').classList.remove('show');makeSharedOptions();renderMulti();showTurn();
+}
+function showTurn(){
+  turnStage=1;const p=currentTurnPlayer();document.getElementById('multiPrompt').textContent=playerNames[p-1]+' wybiera pierwszy.';document.getElementById('nextPlayer').textContent=playerNames[p-1];
+  document.getElementById('reveal').classList.remove('show');document.getElementById('multiPlay').classList.remove('hidden');document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;
+}
+function chooseMulti(btn){
+  if(roundResolved)return;const p=currentTurnPlayer();if(p===null||answer[p]!==null)return;
+  answer[p]={op:btn.dataset.op,factor:Number(btn.dataset.factor),label:btn.textContent};document.getElementById('ma').disabled=true;document.getElementById('mb').disabled=true;
+  if(turnStage===1){turnStage=2;const n=currentTurnPlayer();document.getElementById('multiPrompt').textContent=playerNames[n-1]+' — teraz Twoja kolej.';document.getElementById('nextPlayer').textContent=playerNames[n-1];document.getElementById('ma').disabled=false;document.getElementById('mb').disabled=false;return}
+  turnStage=3;revealRound();
+}
+function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
+function revealRound(){
+  if(answer[1]===null||answer[2]===null||roundResolved)return;roundResolved=true;p1Result=applyOperation(base1,answer[1]);p2Result=applyOperation(base2,answer[2]);
+  const e1=error(p1Result),e2=error(p2Result),w=e1===e2?'REMIS':e1<e2?'G1':'G2';if(w==='G1')score1++;else if(w==='G2')score2++;
+  multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2,winner:w});renderMulti();
+  document.getElementById('revealTitle').textContent=w==='REMIS'?'Remis rundy':w==='G1'?playerNames[0]+' wygrywa rundę':playerNames[1]+' wygrywa rundę';
+  document.getElementById('revealText').textContent=playerNames[0]+': '+answer[1].label+' → '+fmt(p1Result)+' · błąd '+fmt(e1)+'\\n'+playerNames[1]+': '+answer[2].label+' → '+fmt(p2Result)+' · błąd '+fmt(e2)+'\\nMałe punkty: '+score1+' : '+score2+(multiRound===10?'\\nTo była ostatnia runda.':'');
+  document.getElementById('multiPlay').classList.add('hidden');document.getElementById('reveal').classList.add('show');document.getElementById('nextRound').textContent=multiRound===10?'Wyniki końcowe':'Następna runda';document.getElementById('nextRound').onclick=nextMultiRound;
+}
+function nextMultiRound(){
+  if(!roundResolved)return;if(multiRound>=10){showFinal();return}
+  base1=p1Result;base2=p2Result;multiRound++;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;turnStage=0;firstPlayer=firstPlayer===1?2:1;
   makeSharedOptions();renderMulti();showTurn();
 }
-
-function showTurn(){
-  turnStage=1;
-  const player=currentTurnPlayer();
-  document.getElementById('multiPrompt').textContent='Gracz '+player+' wybiera pierwszy.';
-  document.getElementById('nextPlayer').textContent='Gracz '+player;
-  document.getElementById('passScreen').classList.remove('show');
-  document.getElementById('reveal').classList.remove('show');
-  document.getElementById('multiPlay').classList.remove('hidden');
-  document.getElementById('ma').disabled=false;
-  document.getElementById('mb').disabled=false;
+function showFinal(){
+  const w=score1===score2?'REMIS':score1>score2?'G1':'G2';
+  document.getElementById('revealTitle').textContent=w==='REMIS'?'Remis całego meczu':playerNames[w==='G1'?0:1]+' zdobywa DUŻY PUNKT';
+  document.getElementById('revealText').textContent='Po 10 rundach: '+playerNames[0]+' — '+score1+' małych punktów, '+playerNames[1]+' — '+score2+' małych punktów.';
+  document.getElementById('nextRound').textContent='Zagraj ponownie';document.getElementById('nextRound').onclick=()=>startMulti();
 }
-
-function chooseMulti(btn){
-  if(roundResolved)return;
-  const player=currentTurnPlayer();
-  if(player===null || answer[player]!==null)return;
-  answer[player]={op:btn.dataset.op,factor:Number(btn.dataset.factor),label:btn.textContent};
-  document.getElementById('ma').disabled=true;
-  document.getElementById('mb').disabled=true;
-  document.getElementById('multiPlay').classList.add('hidden');
-
-  if(turnStage===1){
-    turnStage=2;
-    const nextPlayer=currentTurnPlayer();
-    document.getElementById('passText').textContent='Gracz '+player+' odpowiedział. Przekaż telefon Gracz '+nextPlayer+'.';
-    document.getElementById('passScreen').classList.add('show');
-    return;
-  }
-
-  if(turnStage===2){
-    turnStage=3;
-    revealRound();
-  }
-}
-
-function continuePass(){
-  if(turnStage!==2)return;
-  const player=currentTurnPlayer();
-  document.getElementById('passScreen').classList.remove('show');
-  document.getElementById('multiPlay').classList.remove('hidden');
-  document.getElementById('multiPrompt').textContent='Gracz '+player+' wybiera teraz.';
-  document.getElementById('nextPlayer').textContent='Gracz '+player;
-  document.getElementById('ma').disabled=false;
-  document.getElementById('mb').disabled=false;
-}
-
-function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
-
-function revealRound(){
-  if(answer[1]===null||answer[2]===null||roundResolved)return;
-  roundResolved=true;
-  p1Result=applyOperation(base,answer[1]);
-  p2Result=applyOperation(base,answer[2]);
-  const e1=error(p1Result),e2=error(p2Result);
-  const winner=e1===e2?'remis':e1<e2?'G1':'G2';
-  multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2,winner});
-  renderMulti();
-  const same=answer[1].op===answer[2].op&&answer[1].factor===answer[2].factor;
-  const title=document.getElementById('revealTitle');
-  const text=document.getElementById('revealText');
-  title.textContent=winner==='remis'?'Remis':winner==='G1'?'Rundę wygrywa Gracz 1':'Rundę wygrywa Gracz 2';
-  text.textContent='Liczba bazowa: '+fmt(base)+'\\nG1: '+answer[1].label+' = '+fmt(p1Result)+' · błąd '+fmt(e1)+'\\nG2: '+answer[2].label+' = '+fmt(p2Result)+' · błąd '+fmt(e2)+'\\n'+(same?'Obaj wybrali to samo działanie.':'Gracze wybrali różne działania.');
-  document.getElementById('passScreen').classList.remove('show');
-  document.getElementById('multiPlay').classList.add('hidden');
-  document.getElementById('reveal').classList.add('show');
-}
-
-function nextMultiRound(){
-  if(!roundResolved)return;
-  const e1=error(p1Result),e2=error(p2Result);
-  if(e1<e2){base=p1Result;firstPlayer=2}
-  else if(e2<e1){base=p2Result;firstPlayer=1}
-  else{base=p1Result;firstPlayer=firstPlayer===1?2:1}
-  multiRound++;answer={1:null,2:null};p1Result=null;p2Result=null;roundResolved=false;turnStage=0;
-  makeSharedOptions();
-  document.getElementById('reveal').classList.remove('show');
-  document.getElementById('multiPlay').classList.remove('hidden');
-  renderMulti();showTurn();
-}
-
 function reset(){
   if(mode==='single'){
     value=1;round=1;history=[{round:1,value:1,error:error(1)}];renderSingle();makeSingleOptions();
@@ -402,7 +276,6 @@ document.getElementById('a').onclick=e=>chooseSingle(e.currentTarget);
 document.getElementById('b').onclick=e=>chooseSingle(e.currentTarget);
 document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);
-document.getElementById('continuePass').onclick=continuePass;
 document.getElementById('nextRound').onclick=()=>nextMultiRound();
 document.getElementById('restart').onclick=reset;
 document.getElementById('mode1').onclick=()=>{
