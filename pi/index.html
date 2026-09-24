@@ -21,7 +21,7 @@ h1{margin:0 0 6px;text-align:center;font-size:34px}
 .base-number{text-align:center;background:#111720;border-radius:16px;padding:8px;margin-bottom:8px}.base-number small{display:block;color:#8f9baa;font-size:11px;letter-spacing:.08em}.base-number b{display:block;font-size:28px;font-weight:900;margin-top:3px}.base-number span{display:block;color:#aeb9c8;font-size:12px;margin-top:2px}.players{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .player{background:#111720;border-radius:14px;padding:7px;text-align:center;border:2px solid transparent}.player.p1{border-color:#55d6ff}.player.p2{border-color:#ff75b5}.player.p1 .player-name{color:#55d6ff}.player.p2 .player-name{color:#ff75b5}
 .player.leading{border-color:#7ee2a8}.player.losing{border-color:#ff9d9d}
-.player-name{font-weight:800;margin-bottom:4px}.name-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.name-inputs input{width:100%;padding:8px;border-radius:12px;border:1px solid #465267;background:#111720;color:#fff;font-size:16px;text-align:center}.score{font-size:12px;color:#aeb9c8;margin-top:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:24px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
+.player-name{font-weight:800;margin-bottom:4px}.name-inputs{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px}.name-inputs input{width:100%;padding:8px;border-radius:12px;border:1px solid #465267;background:#111720;color:#fff;font-size:16px;text-align:center}.score{font-size:12px;color:#aeb9c8;margin-top:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:24px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
 .chart-wrap{background:#111720;border-radius:16px;padding:7px;margin-bottom:8px}
 .chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:4px}
 .chart-help{text-align:center;color:#7f8b9a;font-size:12px;margin-bottom:4px}
@@ -37,7 +37,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
 .pass.show{display:block;position:relative;z-index:2}.pass h2{margin:0 0 10px;font-size:28px}.pass p{color:#aeb9c8;margin:0 0 20px}
 .pass button{font-size:18px;padding:14px 22px}
 .actions{display:none;justify-content:center;gap:8px;margin-top:4px}.restart{font-size:16px;padding:11px 18px}
-.hidden{display:none!important}
+.name-inputs #confirmNames{padding:8px 12px;font-size:14px;border-radius:12px;white-space:nowrap}.hidden{display:none!important}
 @media(max-width:500px){
 body{padding:6px;align-items:start}
 .card{padding:10px;border-radius:16px;min-height:calc(100vh - 12px)}
@@ -46,7 +46,7 @@ h1{font-size:25px;margin-bottom:2px}
 .target{margin:2px 0 6px}.pi{font-size:28px}.target span{font-size:11px}
 .modebar{margin-bottom:6px}.modebar button{padding:6px 9px;font-size:11px}
 .stats{gap:5px;margin-bottom:6px}.stat{padding:5px;border-radius:10px}.stat b{font-size:16px}.stat small{font-size:9px}
-.name-inputs{gap:5px;margin-bottom:6px}.name-inputs input{padding:6px;font-size:13px}
+.name-inputs{gap:5px;margin-bottom:6px}.name-inputs input{padding:6px;font-size:13px}.name-inputs #confirmNames{padding:6px 8px;font-size:11px}
 .base-number{padding:5px;margin-bottom:6px}.base-number small{font-size:8px}.base-number b{font-size:22px}.base-number span{font-size:9px}
 .current-operation-label{font-size:9px;margin:0 0 3px}.prompt{font-size:12px;margin-bottom:4px}
 .options{gap:5px}.options button{padding:11px 6px;font-size:18px;border-radius:11px}
@@ -86,7 +86,7 @@ h1{font-size:25px;margin-bottom:2px}
   </section>
 
   <section id="multiMode">
-    <div class="stats"><div class="stat"><small>Runda</small><b id="multiRound">1 / 10</b></div><div class="stat"><small>Małe punkty</small><b id="roundScore">0 : 0</b></div><div class="stat"><small>Wybiera</small><b id="nextPlayer">Gracz 1</b></div></div><div class="name-inputs"><input id="name1" maxlength="18" value="Gracz 1" aria-label="Nazwa Gracza 1"><input id="name2" maxlength="18" value="Gracz 2" aria-label="Nazwa Gracza 2"></div>
+    <div class="stats"><div class="stat"><small>Runda</small><b id="multiRound">1 / 10</b></div><div class="stat"><small>Małe punkty</small><b id="roundScore">0 : 0</b></div><div class="stat"><small>Wybiera</small><b id="nextPlayer">Gracz 1</b></div></div><div class="name-inputs"><input id="name1" maxlength="18" value="Gracz 1" aria-label="Nazwa Gracza 1"><input id="name2" maxlength="18" value="Gracz 2" aria-label="Nazwa Gracza 2"><button id="confirmNames" type="button">Zatwierdź</button></div>
 
 
     <div class="base-number"><small>LICZBY STARTOWE TEJ RUNDY</small><b id="baseValue">1 / 1</b><span>Każdy gracz prowadzi własną ścieżkę liczb</span></div>
@@ -294,6 +294,9 @@ document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('nextRound').onclick=()=>nextMultiRound();
 document.getElementById('restart').onclick=reset;
+document.getElementById('confirmNames').onclick=()=>startMulti();
+document.getElementById('name1').addEventListener('keydown',e=>{if(e.key==='Enter')startMulti()});
+document.getElementById('name2').addEventListener('keydown',e=>{if(e.key==='Enter')startMulti()});
 document.getElementById('mode1').onclick=()=>{
   mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');
   document.getElementById('singleMode').classList.remove('hidden');document.getElementById('multiMode').classList.add('hidden');
