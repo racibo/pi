@@ -215,7 +215,6 @@ function renderMulti(){
   document.getElementById('p1Value').textContent=p1Result===null?'—':fmt(p1Result);document.getElementById('p2Value').textContent=p2Result===null?'—':fmt(p2Result);
   document.getElementById('p1Error').textContent=p1Result===null?'—':fmt(error(p1Result));document.getElementById('p2Error').textContent=p2Result===null?'—':fmt(error(p2Result));
   const e1=p1Result===null?Infinity:error(p1Result),e2=p2Result===null?Infinity:error(p2Result);
-  document.getElementById('lead').textContent=p1Result===null||p2Result===null?'—':e1===e2?'remis':(e1<e2?playerNames[0]+' + ':playerNames[1]+' + ')+fmt(Math.abs(e1-e2));
   document.getElementById('p1Card').className='player p1 '+(p1Result!==null&&p2Result!==null?(e1<e2?'leading':e1>e2?'losing':''):'');
   document.getElementById('p2Card').className='player p2 '+(p1Result!==null&&p2Result!==null?(e2<e1?'leading':e2>e1?'losing':''):'');
   document.getElementById('p1Turn').textContent=currentTurnPlayer()===1?'teraz wybiera':'';document.getElementById('p2Turn').textContent=currentTurnPlayer()===2?'teraz wybiera':'';
