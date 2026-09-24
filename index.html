@@ -239,12 +239,9 @@ function renderMulti(){
 }
 function drawMultiChart(){
   const svg=document.getElementById('multiChart'),w=640,h=280,left=48,right=18,top=20,bottom=42,iw=w-left-right,ih=h-top-bottom,cy=top+ih/2;
-  const all=multiHistory.flatMap(d=>[d.p1Error,d.p2Error]);
-  const maxE=Math.max(...all,0.000001);
-  // Logarytmiczna skala: małe błędy są mocno rozciągnięte, duże błędy kompresowane.
+  const all=multiHistory.flatMap(d=>[d.p1Error,d.p2Error]),maxE=Math.max(...all,0.000001);
   const logE=e=>Math.log10(1+e)/Math.log10(1+maxE);
-  const y1=e=>cy-logE(e)*(ih/2-12);
-  const y2=e=>cy+logE(e)*(ih/2-12);
+  const y1=e=>cy-logE(e)*(ih/2-12),y2=e=>cy+logE(e)*(ih/2-12);
   const x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw;
   let s='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+ih)+'" stroke="#394456"/>';
   s+='<line x1="'+left+'" y1="'+cy+'" x2="'+(left+iw)+'" y2="'+cy+'" stroke="#7ee2a8" stroke-width="2" stroke-dasharray="7 5"/>';
