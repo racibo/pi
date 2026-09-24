@@ -276,11 +276,13 @@ function drawMultiChart(){
     s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y1(d.p1Error)).join(' ')+'" fill="none" stroke="#55d6ff" stroke-width="3"/>';
     s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y2(d.p2Error)).join(' ')+'" fill="none" stroke="#ff75b5" stroke-width="3"/>';
   }
-  const best1=multiHistory.length?Math.min(...multiHistory.map(d=>d.p1Error)):Infinity;
-  const best2=multiHistory.length?Math.min(...multiHistory.map(d=>d.p2Error)):Infinity;
+  const allBest=multiHistory.length?Math.min(...multiHistory.flatMap(d=>[d.p1Error,d.p2Error])):Infinity;
+  let bestMarked=false;
   multiHistory.forEach((d,i)=>{
     const xx=x(i),a=y1(d.p1Error),b=y2(d.p2Error),win1=d.winner==='G1',win2=d.winner==='G2';
-    const bestP1=Math.abs(d.p1Error-best1)<1e-12,bestP2=Math.abs(d.p2Error-best2)<1e-12;
+    const bestP1=!bestMarked&&Math.abs(d.p1Error-allBest)<1e-12;
+    const bestP2=!bestMarked&&Math.abs(d.p2Error-allBest)<1e-12;
+    if(bestP1||bestP2)bestMarked=true;
     s+='<circle class="'+(bestP1?'best-point':'')+'" cx="'+xx+'" cy="'+a+'" r="'+(bestP1?7:(win1?6:4))+'" fill="#55d6ff"/>';
     s+='<circle class="'+(bestP2?'best-point':'')+'" cx="'+xx+'" cy="'+b+'" r="'+(bestP2?7:(win2?6:4))+'" fill="#ff75b5"/>';
     if(bestP1)s+='<text class="best-label" x="'+xx+'" y="'+(a-11)+'" text-anchor="middle">★ NAJBLIŻEJ</text>';
