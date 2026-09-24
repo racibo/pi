@@ -202,7 +202,7 @@ function makeSharedOptions(){
   let chosen=pairs.length?pairs[Math.floor(Math.random()*pairs.length)]:null;
   if(!chosen&&pool.length>=2)chosen={x:pool[0],y:pool[1]};
   if(!chosen)chosen={x:operation('÷',2,base1),y:operation('÷',3,base1)};
-  let x={op:chosen.x.op,factor:chosen.x.factor},y={op:chosen.y.op,factor:chosen.y.factor};
+  let x={op:chosen.x.op,factor:chosen.x.factor,label:chosen.x.label},y={op:chosen.y.op,factor:chosen.y.factor,label:chosen.y.label};
   if(Math.random()<.5)[x,y]=[y,x];
   sharedOptions=[x,y];setButtons('ma','mb',x,y);
 }
