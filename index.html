@@ -10,25 +10,25 @@
 body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#24324a,#0d1117 60%);color:#f4f7fb;padding:18px}
 .card{width:min(760px,100%);background:rgba(20,26,36,.94);border:1px solid #394456;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
 h1{margin:0 0 6px;text-align:center;font-size:34px}
-.sub{text-align:center;color:#aeb9c8;margin:0 0 18px}
-.target{display:flex;justify-content:center;align-items:center;gap:12px;margin:10px 0 20px}
+.sub{text-align:center;color:#aeb9c8;margin:0 0 12px}
+.target{display:flex;justify-content:center;align-items:center;gap:12px;margin:6px 0 12px}
 .pi{font-size:48px;font-weight:800}.target span{color:#9eabbc}
-.modebar{display:flex;gap:8px;justify-content:center;margin-bottom:18px}
+.modebar{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
 .modebar button{padding:9px 14px;font-size:14px;border-radius:12px}
 .modebar button.active{background:#2a3547;border-color:#8b9bb2}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
-.stat{background:#111720;border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
-.base-number{text-align:center;background:#111720;border-radius:16px;padding:14px;margin-bottom:14px}.base-number small{display:block;color:#8f9baa;font-size:11px;letter-spacing:.08em}.base-number b{display:block;font-size:38px;font-weight:900;margin-top:3px}.base-number span{display:block;color:#aeb9c8;font-size:12px;margin-top:2px}.players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.player{background:#111720;border-radius:14px;padding:12px;text-align:center;border:2px solid transparent}.player.p1{border-color:#55d6ff}.player.p2{border-color:#ff75b5}.player.p1 .player-name{color:#55d6ff}.player.p2 .player-name{color:#ff75b5}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stat{background:#111720;border-radius:14px;padding:8px;text-align:center}.stat b{display:block;font-size:20px}.stat small{color:#8f9baa}
+.base-number{text-align:center;background:#111720;border-radius:16px;padding:8px;margin-bottom:8px}.base-number small{display:block;color:#8f9baa;font-size:11px;letter-spacing:.08em}.base-number b{display:block;font-size:28px;font-weight:900;margin-top:3px}.base-number span{display:block;color:#aeb9c8;font-size:12px;margin-top:2px}.players{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.player{background:#111720;border-radius:14px;padding:7px;text-align:center;border:2px solid transparent}.player.p1{border-color:#55d6ff}.player.p2{border-color:#ff75b5}.player.p1 .player-name{color:#55d6ff}.player.p2 .player-name{color:#ff75b5}
 .player.leading{border-color:#7ee2a8}.player.losing{border-color:#ff9d9d}
-.player-name{font-weight:800;margin-bottom:4px}.name-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.name-inputs input{width:100%;padding:12px;border-radius:12px;border:1px solid #465267;background:#111720;color:#fff;font-size:16px;text-align:center}.score{font-size:12px;color:#aeb9c8;margin-top:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:32px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
-.chart-wrap{background:#111720;border-radius:16px;padding:12px;margin-bottom:18px}
+.player-name{font-weight:800;margin-bottom:4px}.name-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.name-inputs input{width:100%;padding:8px;border-radius:12px;border:1px solid #465267;background:#111720;color:#fff;font-size:16px;text-align:center}.score{font-size:12px;color:#aeb9c8;margin-top:4px}.current-label{font-size:10px;letter-spacing:.08em;color:#7f8b9a;margin-top:6px}.player-value{font-size:24px;font-weight:900;margin:2px 0 3px}.player-error{color:#aeb9c8;font-size:13px}.turn{font-size:12px;margin-top:5px;color:#f4f7fb}
+.chart-wrap{background:#111720;border-radius:16px;padding:7px;margin-bottom:8px}
 .chart-title{text-align:center;color:#c9d2df;font-size:14px;margin-bottom:4px}
 .chart-help{text-align:center;color:#7f8b9a;font-size:12px;margin-bottom:4px}
-#chart{display:block;width:100%;height:260px}#multiChart{display:block;width:100%;height:280px}#multiChart{display:block;width:100%;height:280px}
-.prompt{text-align:center;color:#c9d2df;margin-bottom:14px}.current-operation-label{text-align:center;font-size:12px;font-weight:800;letter-spacing:.04em;color:#7ee2a8;margin:2px 0 8px}
-.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:16px;padding:20px 12px;font-size:22px;font-weight:700;cursor:pointer;transition:.15s}
+#chart{display:block;width:100%;height:150px}#multiChart{display:block;width:100%;height:105px}
+.prompt{text-align:center;color:#c9d2df;margin-bottom:7px}.current-operation-label{text-align:center;font-size:10px;font-weight:800;letter-spacing:.04em;color:#7ee2a8;margin:1px 0 4px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:1px solid #465267;background:#1a2230;color:#fff;border-radius:14px;padding:13px 10px;font-size:20px;font-weight:700;cursor:pointer;transition:.15s}
 button:hover{transform:translateY(-2px);background:#222d3e;border-color:#71809a}
 button:disabled{opacity:.55;cursor:default;transform:none}
 #feedback{text-align:center;min-height:52px;margin-top:18px;font-size:17px;line-height:1.45}
@@ -36,9 +36,26 @@ button:disabled{opacity:.55;cursor:default;transform:none}
 .pass{display:none;text-align:center;padding:24px 8px}
 .pass.show{display:block;position:relative;z-index:2}.pass h2{margin:0 0 10px;font-size:28px}.pass p{color:#aeb9c8;margin:0 0 20px}
 .pass button{font-size:18px;padding:14px 22px}
-.actions{display:flex;justify-content:center;gap:8px;margin-top:8px}.restart{font-size:16px;padding:11px 18px}
+.actions{display:none;justify-content:center;gap:8px;margin-top:4px}.restart{font-size:16px;padding:11px 18px}
 .hidden{display:none!important}
-@media(max-width:500px){.card{padding:20px}.pi{font-size:40px}.stats{grid-template-columns:1fr}.options{grid-template-columns:1fr}#chart,#multiChart{height:230px}}
+@media(max-width:500px){
+body{padding:6px;align-items:start}
+.card{padding:10px;border-radius:16px;min-height:calc(100vh - 12px)}
+h1{font-size:25px;margin-bottom:2px}
+.sub{font-size:11px;margin-bottom:5px}
+.target{margin:2px 0 6px}.pi{font-size:28px}.target span{font-size:11px}
+.modebar{margin-bottom:6px}.modebar button{padding:6px 9px;font-size:11px}
+.stats{gap:5px;margin-bottom:6px}.stat{padding:5px;border-radius:10px}.stat b{font-size:16px}.stat small{font-size:9px}
+.name-inputs{gap:5px;margin-bottom:6px}.name-inputs input{padding:6px;font-size:13px}
+.base-number{padding:5px;margin-bottom:6px}.base-number small{font-size:8px}.base-number b{font-size:22px}.base-number span{font-size:9px}
+.current-operation-label{font-size:9px;margin:0 0 3px}.prompt{font-size:12px;margin-bottom:4px}
+.options{gap:5px}.options button{padding:11px 6px;font-size:18px;border-radius:11px}
+.players{gap:5px;margin-bottom:6px}.player{padding:5px;border-radius:10px}.player-name{font-size:13px}.current-label{font-size:8px}.player-value{font-size:21px}.player-error{font-size:10px}.score{font-size:9px}.turn{font-size:9px}
+.chart-wrap{padding:4px;margin-bottom:5px;border-radius:10px}.chart-title{font-size:10px}.chart-help{font-size:8px}
+#chart{height:95px}#multiChart{height:75px}
+.pass{padding:8px}.pass h2{font-size:20px}.pass p{font-size:12px;margin-bottom:8px}.pass button{font-size:15px;padding:9px 14px}
+.restart{display:none}
+}
 </style>
 </head>
 <body>
@@ -125,7 +142,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
 
 <script>
 const PI=Math.PI;
-const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10});
+const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:4});
 const error=n=>Math.abs(n-PI);
 const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:value/factor,label:op+' '+fmt(factor)});
 
