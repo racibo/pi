@@ -265,9 +265,13 @@ function applyOperation(v,a){return a.op==='×'?v*a.factor:v/a.factor}
 function revealRound(){
   if(answer[1]===null||answer[2]===null||roundResolved)return;roundResolved=true;p1Result=applyOperation(base1,answer[1]);p2Result=applyOperation(base2,answer[2]);
   const e1=error(p1Result),e2=error(p2Result),w=e1===e2?'REMIS':e1<e2?'G1':'G2';if(w==='G1')score1++;else if(w==='G2')score2++;
-  multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2,winner:w});renderMulti();
+  multiHistory.push({round:multiRound,p1Error:e1,p2Error:e2,p1Value:p1Result,p2Value:p2Result,winner:w});renderMulti();
   document.getElementById('revealTitle').textContent=w==='REMIS'?'Remis rundy':w==='G1'?playerNames[0]+' wygrywa rundę':playerNames[1]+' wygrywa rundę';
-  document.getElementById('revealText').textContent=playerNames[0]+': '+answer[1].label+' → '+fmt(p1Result)+' · błąd '+fmt(e1)+'\\n'+playerNames[1]+': '+answer[2].label+' → '+fmt(p2Result)+' · błąd '+fmt(e2)+'\\nMałe punkty: '+score1+' : '+score2+(multiRound===10?'\\nTo była ostatnia runda.':'');
+  const n1=fmt(base1),n2=fmt(base2),r1=p1Result.toLocaleString('pl-PL',{maximumFractionDigits:7}),r2=p2Result.toLocaleString('pl-PL',{maximumFractionDigits:7}),er1=e1.toLocaleString('pl-PL',{maximumFractionDigits:7}),er2=e2.toLocaleString('pl-PL',{maximumFractionDigits:7});
+  document.getElementById('revealText').innerHTML='<b>Liczba startowa:</b> '+n1+' dla obu graczy<br><br>'+
+    '<b>'+playerNames[0]+'</b><br>'+n1+' '+answer[1].op+' '+answer[1].factor+' = <b>'+r1+'</b><br>Odległość od π: <b>'+er1+'</b><br><br>'+
+    '<b>'+playerNames[1]+'</b><br>'+n2+' '+answer[2].op+' '+answer[2].factor+' = <b>'+r2+'</b><br>Odległość od π: <b>'+er2+'</b><br><br>'+
+    '<b>Małe punkty: '+score1+' : '+score2+'</b>';
   document.getElementById('multiPlay').classList.add('hidden');document.getElementById('reveal').classList.add('show');document.getElementById('nextRound').textContent=multiRound===10?'Wyniki końcowe':'Następna runda';document.getElementById('nextRound').onclick=nextMultiRound;
 }
 function nextMultiRound(){
