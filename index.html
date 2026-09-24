@@ -116,7 +116,7 @@ h1{font-size:25px;margin-bottom:2px}
 
     <div class="chart-wrap">
       <div class="chart-title">Wyścig do π</div>
-      <div class="chart-help">Im niżej, tym bliżej π · linie pokazują odległość obu graczy</div>
+      <div class="chart-help">π = środek · logarytmiczna odległość · każda runda pokazuje, kto był bliżej</div>
       <svg id="multiChart" viewBox="0 0 640 280" aria-label="Liniowy wykres odległości obu graczy od pi"></svg>
     </div>
 
@@ -238,11 +238,33 @@ function renderMulti(){
   drawMultiChart();
 }
 function drawMultiChart(){
-  const svg=document.getElementById('multiChart'),w=640,h=280,left=48,right=18,top=18,bottom=34,iw=w-left-right,ih=h-top-bottom;
-  const all=multiHistory.flatMap(x=>[x.p1Error,x.p2Error]),maxE=Math.max(...all,0.000001),y=e=>top+(e/maxE)*ih,x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw;
-  let s='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+ih)+'" stroke="#394456"/><line x1="'+left+'" y1="'+(top+ih)+'" x2="'+(left+iw)+'" y2="'+(top+ih)+'" stroke="#394456"/>';
-  if(multiHistory.length>1){s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p1Error)).join(' ')+'" fill="none" stroke="#55d6ff" stroke-width="3"/><polyline points="'+multiHistory.map((d,i)=>x(i)+','+y(d.p2Error)).join(' ')+'" fill="none" stroke="#ff75b5" stroke-width="3"/>'}
-  multiHistory.forEach((d,i)=>{const xx=x(i);s+='<circle cx="'+xx+'" cy="'+y(d.p1Error)+'" r="5" fill="#55d6ff"/><circle cx="'+xx+'" cy="'+y(d.p2Error)+'" r="5" fill="#ff75b5"/><text x="'+xx+'" y="'+(top+ih+24)+'" text-anchor="middle" fill="#c9d2df" font-size="11">R'+d.round+' · '+d.winner+'</text>'});svg.innerHTML=s;
+  const svg=document.getElementById('multiChart'),w=640,h=280,left=48,right=18,top=20,bottom=42,iw=w-left-right,ih=h-top-bottom,cy=top+ih/2;
+  const all=multiHistory.flatMap(d=>[d.p1Error,d.p2Error]);
+  const maxE=Math.max(...all,0.000001);
+  // Logarytmiczna skala: małe błędy są mocno rozciągnięte, duże błędy kompresowane.
+  const logE=e=>Math.log10(1+e)/Math.log10(1+maxE);
+  const y1=e=>cy-logE(e)*(ih/2-12);
+  const y2=e=>cy+logE(e)*(ih/2-12);
+  const x=i=>multiHistory.length===1?left+iw/2:left+(i/(multiHistory.length-1))*iw;
+  let s='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+ih)+'" stroke="#394456"/>';
+  s+='<line x1="'+left+'" y1="'+cy+'" x2="'+(left+iw)+'" y2="'+cy+'" stroke="#7ee2a8" stroke-width="2" stroke-dasharray="7 5"/>';
+  s+='<text x="'+(left+6)+'" y="'+(cy-7)+'" fill="#7ee2a8" font-size="12" font-weight="700">π</text>';
+  s+='<text x="'+(left+6)+'" y="'+(top+13)+'" fill="#55d6ff" font-size="10">'+playerNames[0]+' — dalej</text>';
+  s+='<text x="'+(left+6)+'" y="'+(top+26)+'" fill="#ff75b5" font-size="10">'+playerNames[1]+' — dalej</text>';
+  s+='<text x="'+(left+6)+'" y="'+(top+39)+'" fill="#aeb9c8" font-size="9">Im bliżej linii π, tym mniejszy błąd</text>';
+  if(multiHistory.length>1){
+    s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y1(d.p1Error)).join(' ')+'" fill="none" stroke="#55d6ff" stroke-width="3"/>';
+    s+='<polyline points="'+multiHistory.map((d,i)=>x(i)+','+y2(d.p2Error)).join(' ')+'" fill="none" stroke="#ff75b5" stroke-width="3"/>';
+  }
+  multiHistory.forEach((d,i)=>{
+    const xx=x(i),a=y1(d.p1Error),b=y2(d.p2Error),win1=d.winner==='G1',win2=d.winner==='G2';
+    s+='<circle cx="'+xx+'" cy="'+a+'" r="'+(win1?6:4)+'" fill="#55d6ff"/>';
+    s+='<circle cx="'+xx+'" cy="'+b+'" r="'+(win2?6:4)+'" fill="#ff75b5"/>';
+    if(win1||win2)s+='<text x="'+xx+'" y="'+(win1?a-9:b+17)+'" text-anchor="middle" fill="'+(win1?'#55d6ff':'#ff75b5')+'" font-size="10" font-weight="700">✓</text>';
+    s+='<text x="'+xx+'" y="'+(top+ih+17)+'" text-anchor="middle" fill="#c9d2df" font-size="10">R'+d.round+'</text>';
+    s+='<text x="'+xx+'" y="'+(top+ih+30)+'" text-anchor="middle" fill="#7f8b9a" font-size="9">'+(d.winner==='REMIS'?'REMIS':d.winner==='G1'?playerNames[0]:playerNames[1])+'</text>';
+  });
+  svg.innerHTML=s;
 }
 function startMulti(){
   base1=1;base2=1;p1Result=null;p2Result=null;multiRound=1;firstPlayer=1;answer={1:null,2:null};sharedOptions=[];roundResolved=false;multiHistory=[];score1=0;score2=0;turnStage=0;
@@ -281,8 +303,12 @@ function nextMultiRound(){
 }
 function showFinal(){
   const w=score1===score2?'REMIS':score1>score2?'G1':'G2';
+  const all1=multiHistory.map(d=>d.p1Error),all2=multiHistory.map(d=>d.p2Error);
+  const best1=Math.min(...all1),best2=Math.min(...all2);
+  const bestRound1=multiHistory.find(d=>d.p1Error===best1)?.round, bestRound2=multiHistory.find(d=>d.p2Error===best2)?.round;
+  const closest=best1===best2?'Obaj mieli taki sam najmniejszy błąd.':best1<best2?playerNames[0]+' był najbliżej π w całym meczu (R'+bestRound1+', błąd '+best1.toLocaleString('pl-PL',{maximumFractionDigits:7})+').':playerNames[1]+' był najbliżej π w całym meczu (R'+bestRound2+', błąd '+best2.toLocaleString('pl-PL',{maximumFractionDigits:7})+').';
   document.getElementById('revealTitle').textContent=w==='REMIS'?'Remis całego meczu':playerNames[w==='G1'?0:1]+' zdobywa DUŻY PUNKT';
-  document.getElementById('revealText').textContent='Po 10 rundach: '+playerNames[0]+' — '+score1+' małych punktów, '+playerNames[1]+' — '+score2+' małych punktów.';
+  document.getElementById('revealText').innerHTML='<b>Po 10 rundach:</b> '+playerNames[0]+' — '+score1+' małych punktów, '+playerNames[1]+' — '+score2+' małych punktów.<br><br>'+closest+'<br><br><b>Duży punkt:</b> '+(w==='REMIS'?'brak — remis małych punktów.':playerNames[w==='G1'?0:1]+' zdobywa go dzięki większej liczbie wygranych rund.')+'<br><br><b>Wykres:</b> im bliżej środkowej linii π, tym bliżej celu.';
   document.getElementById('nextRound').textContent='Zagraj ponownie';document.getElementById('nextRound').onclick=()=>startMulti();
 }
 function reset(){
