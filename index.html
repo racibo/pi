@@ -48,11 +48,11 @@ button:disabled{opacity:.55;cursor:default;transform:none}
   <div class="target"><div class="pi">π</div><span>= 3,1415926535…</span></div>
 
   <div class="modebar">
-    <button id="mode1" class="active" type="button">1 gracz</button>
-    <button id="mode2" type="button">2 graczy · jeden telefon</button>
+    <button id="mode1" type="button">1 gracz</button>
+    <button id="mode2" class="active" type="button">2 graczy · jeden telefon</button>
   </div>
 
-  <section id="singleMode">
+  <section id="singleMode" class="hidden">
     <div class="stats">
       <div class="stat"><small>Aktualna liczba</small><b id="value">1</b></div>
       <div class="stat"><small>Błąd od π</small><b id="error">2,141592654</b></div>
@@ -68,7 +68,7 @@ button:disabled{opacity:.55;cursor:default;transform:none}
     <div id="feedback" class="muted" aria-live="polite">Policz wynik w głowie lub na kartce.</div>
   </section>
 
-  <section id="multiMode" class="hidden">
+  <section id="multiMode">
     <div class="stats">
       <div class="stat"><small>Runda</small><b id="multiRound">1</b></div>
       <div class="stat"><small>Przewaga</small><b id="lead">—</b></div>
@@ -133,7 +133,7 @@ const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:10});
 const error=n=>Math.abs(n-PI);
 const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:value/factor,label:op+' '+fmt(factor)});
 
-let mode='single';
+let mode='multi';
 let value=1,round=1,history=[{round:1,value:1,error:error(1)}];
 
 let base=1,p1Result=null,p2Result=null,multiRound=1,multiHistory=[];
@@ -403,7 +403,7 @@ document.getElementById('b').onclick=e=>chooseSingle(e.currentTarget);
 document.getElementById('ma').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('mb').onclick=e=>chooseMulti(e.currentTarget);
 document.getElementById('continuePass').onclick=continuePass;
-document.getElementById('nextRound').onclick=nextMultiRound;
+document.getElementById('nextRound').onclick=()=>nextMultiRound();
 document.getElementById('restart').onclick=reset;
 document.getElementById('mode1').onclick=()=>{
   mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');
@@ -434,7 +434,8 @@ function multiLogicSelfTest(){
 }
 
 multiLogicSelfTest();
-renderSingle();makeSingleOptions();
+if(mode==='multi') startMulti();
+else { renderSingle(); makeSingleOptions(); }
 </script>
 </body>
 </html>
