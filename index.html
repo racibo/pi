@@ -156,7 +156,7 @@ h1{font-size:25px;margin-bottom:2px}
 <script>
 const PI=Math.PI;
 const MIN_GAME_VALUE=0.01;
-const MAX_GAME_VALUE=10000;
+const MAX_GAME_VALUE=1000;
 const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:4});
 const error=n=>Math.abs(n-PI);
 const operation=(op,factor,value)=>({op,factor,result:op==='×'?value*factor:value/factor,label:op+' '+fmt(factor)});
@@ -364,12 +364,23 @@ document.getElementById('nextRound').onclick=()=>nextMultiRound();
 document.getElementById('restart').onclick=reset;
 function showGameScreen(){document.getElementById('startScreen').style.display='none';document.getElementById('gameScreen').style.display='block'}
 function showStartScreen(){document.getElementById('gameScreen').style.display='none';document.getElementById('startScreen').style.display='block'}
-document.getElementById('startGame').onclick=()=>{showGameScreen();if(mode==='single'){reset()}else startMulti()};
+document.getElementById('startGame').onclick=()=>{
+  showGameScreen();
+  if(mode==='single'){
+    document.getElementById('singleMode').classList.remove('hidden');
+    document.getElementById('multiMode').classList.add('hidden');
+    reset();
+  }else{
+    document.getElementById('singleMode').classList.add('hidden');
+    document.getElementById('multiMode').classList.remove('hidden');
+    startMulti();
+  }
+};
 document.getElementById('startName1').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startGame').click()});
 document.getElementById('startName2').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startGame').click()});
 document.getElementById('backStart').onclick=showStartScreen;
-document.getElementById('mode1').onclick=()=>{mode='single';document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');document.getElementById('startName2').style.visibility='hidden';document.getElementById('startName2').style.pointerEvents='none'};
-document.getElementById('mode2').onclick=()=>{mode='multi';document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');document.getElementById('startName2').style.visibility='visible';document.getElementById('startName2').style.pointerEvents='auto'};
+document.getElementById('mode1').onclick=()=>{mode='single';document.getElementById('singleMode').classList.remove('hidden');document.getElementById('multiMode').classList.add('hidden');document.getElementById('mode1').classList.add('active');document.getElementById('mode2').classList.remove('active');document.getElementById('startName2').style.visibility='hidden';document.getElementById('startName2').style.pointerEvents='none'};
+document.getElementById('mode2').onclick=()=>{mode='multi';document.getElementById('singleMode').classList.add('hidden');document.getElementById('multiMode').classList.remove('hidden');document.getElementById('mode2').classList.add('active');document.getElementById('mode1').classList.remove('active');document.getElementById('startName2').style.visibility='visible';document.getElementById('startName2').style.pointerEvents='auto'};
 
 function multiLogicSelfTest(){
   const fail=[];
